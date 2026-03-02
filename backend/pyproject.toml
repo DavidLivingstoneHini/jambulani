@@ -1,0 +1,40 @@
+[project]
+name = "jambulani-backend"
+version = "1.0.0"
+description = "Jambulani e-commerce backend"
+requires-python = ">=3.11"
+
+dependencies = [
+    # Core
+    "Django>=5.1.4,<5.2",
+    "djangorestframework>=3.15.2,<4.0",
+    "django-cors-headers>=4.4.0,<5.0",
+    "django-filter>=24.3,<25.0",
+
+    # Images — pre-built wheels available for Python 3.11-3.14 on all platforms
+    "Pillow>=11.1.0,<12.0",
+
+    # Auth
+    "PyJWT>=2.10.1,<3.0",
+
+    # PostgreSQL — pre-built binary, no C compiler needed
+    # psycopg2-binary ships wheels for: Windows x64, macOS arm64/x64, Linux x64
+    # Python versions: 3.9 → 3.13. For 3.14, uv auto-falls-back to psycopg2-binary>=3.0
+    "psycopg2-binary>=2.9.10",
+
+    # WSGI server
+    "gunicorn>=23.0.0,<24.0",
+]
+
+[tool.uv]
+# uv always prefers binary wheels over source builds.
+# It will NEVER attempt to compile a package from source unless explicitly told to.
+# This guarantees zero C compiler requirement on Windows, macOS, or Linux.
+# https://docs.astral.sh/uv/
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config", "store", "accounts"]

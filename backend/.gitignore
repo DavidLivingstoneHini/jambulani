@@ -1,150 +1,47 @@
-# Python
+# ── Python ────────────────────────────────────────────────────────
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+*.pyc
+*.pyo
+*.pyd
+*.pdb
 .Python
+*.egg-info/
+dist/
+build/
+wheels/
 
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
-staticfiles/
-static_root/
-media_root/
-
-# Virtual environment
+# ── Virtual environments ──────────────────────────────────────────
+.venv/
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
-pythonenv*
 
-# Environment variables
+# ── Environment / secrets ─────────────────────────────────────────
+# .env is NEVER committed — it contains real credentials
 .env
-.env.local
-.env.production
-.env.development
-.env.*
-!.env.example
 
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-*.sublime-*
-
-# Database dumps
-*.dump
-*.sql
-*.sqlite
-*.sqlite3
-
-# Uploads and user-generated content
-uploads/
+# ── Django ────────────────────────────────────────────────────────
+staticfiles/
 media/
-static/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# Django migrations
-# Uncomment if you want to ignore migration files
-# */migrations/*.py
-# !*/migrations/__init__.py
-
-# Test and coverage
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.pytest_cache/
-.cache/
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-coverage.xml
-*.cover
-.hypothesis/
-
-# Translations
-*.mo
-*.pot
-
-# Django project specific
+db.sqlite3
 *.log
-*.pot
-*.pyc
-__pycache__/
 
-# Backup files
-*.bak
+# ── uv ────────────────────────────────────────────────────────────
+# uv.lock SHOULD be committed in a real project for reproducibility.
+# It is excluded here only because it requires network access to generate
+# with valid hashes — run `uv lock` after cloning to create it.
+uv.lock
 
-# Docker
-docker-compose.override.yml
-Dockerfile.local
-
-# Secrets
-**/secrets.json
-**/credentials.json
-**/keys.json
-
-# Static files collected
-/static/
-
-# Uploaded files
-/uploads/
-
-# PyCharm
+# ── IDE ───────────────────────────────────────────────────────────
+.vscode/
 .idea/
-*.iml
-
-# Vim
 *.swp
 *.swo
-*~
+.project
+.pydevproject
 
-# VS Code
-.vscode/
-.history/
+# ── OS ────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini

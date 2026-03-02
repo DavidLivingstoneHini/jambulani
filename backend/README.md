@@ -1,225 +1,231 @@
-# Jambulani — Customized Club Jerseys
+# Jambulani — Backend API
 
-A full-stack e-commerce application for customized football jerseys. Built with **Nuxt 3** (frontend) and **Django REST Framework** (backend), running with **PostgreSQL** via **Docker**.
-
----
-
-## 📁 Project Structure
-
-```
-jambulani/
-├── docker-compose.yml          # Combined Docker Compose (recommended)
-├── jambulani-backend/          # Django REST Framework API
-│   ├── config/                 # Django project settings & URL config
-│   ├── store/                  # Main app (models, views, serializers, admin)
-│   │   ├── models.py           # League, Collection, Category, Product, Cart, etc.
-│   │   ├── serializers.py      # DRF serializers
-│   │   ├── views.py            # ViewSets & API views
-│   │   ├── admin.py            # Django Admin config
-│   │   ├── urls.py             # API URL routing
-│   │   └── filters.py         # Product filtering
-│   ├── Dockerfile
-│   ├── docker-compose.yml      # Backend-only Docker Compose
-│   ├── requirements.txt
-│   └── entrypoint.sh           # DB wait + migrate + seed
-└── jambulani-frontend/         # Nuxt 3 application
-    ├── assets/css/             # Global Tailwind CSS
-    ├── components/
-    │   ├── layout/             # AppHeader, AppFooter
-    │   ├── cart/               # CartDrawer
-    │   └── product/            # ProductCard
-    ├── composables/            # useApi (fetch wrapper)
-    ├── layouts/                # Default layout
-    ├── pages/
-    │   ├── index.vue           # Home page
-    │   ├── products/
-    │   │   ├── index.vue       # Product listing
-    │   │   └── [slug].vue      # Product detail
-    │   └── checkout.vue        # Checkout page
-    ├── stores/                 # Pinia stores (cart)
-    ├── types/                  # TypeScript interfaces
-    ├── Dockerfile
-    ├── docker-compose.yml
-    └── nuxt.config.ts
-```
+Django REST Framework · PostgreSQL · JWT Authentication
 
 ---
 
-## 🚀 Quick Start (Recommended — Full Stack via Docker)
+## How to Run
 
-### Prerequisites
-- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/) installed
+There are two ways. Pick one.
 
-### 1. Clone the repository
+---
+
+### Option 1 — Docker (Recommended)
+
+**One command. Zero setup. Works on Windows, macOS, Linux.**
+
+> Requires: [Docker Desktop](https://www.docker.com/products/docker-desktop/) (free)
+
 ```bash
-git clone <your-repo-url>
-cd jambulani
-```
-
-### 2. Start everything with one command
-```bash
+git clone <repo-url>
+cd jambulani/backend
 docker compose up --build
 ```
 
-This will:
-1. Start PostgreSQL
-2. Run Django migrations
-3. Seed demo data (products, leagues, collections, admin user)
-4. Start the Django API on `http://localhost:8000`
-5. Build and start the Nuxt frontend on `http://localhost:3000`
+That's it. Docker handles Python, PostgreSQL, migrations, and seed data automatically.
 
-### 3. Access the application
-| Service | URL |
-|---------|-----|
-| **Frontend** | http://localhost:3000 |
-| **Django Admin** | http://localhost:8000/admin |
-| **API Root** | http://localhost:8000/api/v1/ |
+| Service  | URL                           |
+|----------|-------------------------------|
+| API      | http://localhost:8000/api/v1/ |
+| Admin    | http://localhost:8000/admin   |
 
-**Admin credentials:** `admin` / `admin123`
+**Admin login:** `admin@jambulani.com` / `admin123`
+
+To stop: `docker compose down`
 
 ---
 
-## 🔧 Development Setup (Without Docker)
+### Option 2 — Local Development
 
-### Backend
+Runs Django directly on your machine. Still uses PostgreSQL, but only the database runs in Docker.
 
-**Requirements:** Python 3.12+, PostgreSQL
+**Requirements:**
+- Docker Desktop (for the database container)
+- Python 3.11, 3.12, or 3.13
+- `uv` — a modern Python package manager (replaces pip entirely)
 
-```bash
-cd jambulani-backend
+#### Step 1 — Install uv
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+`uv` fetches pre-built binary packages. It never compiles from source, so there are no C compiler errors, no Visual C++ requirements, no zlib errors — on any OS, any Python version.
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env to match your local PostgreSQL credentials
-
-# Set POSTGRES_HOST=localhost in .env
-
-# Run migrations
-python manage.py migrate
-
-# Seed demo data
-python manage.py seed_data
-
-# Start development server
-python manage.py runserver
+**Windows (PowerShell):**
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### Frontend
+**macOS / Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-**Requirements:** Node.js 20+
+Close and reopen your terminal. Verify: `uv --version`
+
+#### Step 2 — Clone and set up
 
 ```bash
-cd jambulani-frontend
+git clone <repo-url>
+cd jambulani/backend
 
-# Install dependencies
-npm install
-
-# Configure environment
+# Copy environment config
 cp .env.example .env
-# .env already points to http://localhost:8000
 
-# Start development server
-npm run dev
+# Install all Python dependencies
+uv sync
+```
+
+`uv sync` reads `pyproject.toml` and `uv.lock`, downloads pre-built wheels, and creates a `.venv` automatically. No activation needed — `uv run` handles it.
+
+#### Step 3 — Start PostgreSQL (Docker, database only)
+
+```bash
+docker compose -f docker-compose.db.yml up -d
+```
+
+This starts only PostgreSQL on port 5432. Your Django process runs locally.
+
+#### Step 4 — Migrate, seed, run
+
+```bash
+uv run python manage.py migrate
+uv run python manage.py seed_data
+uv run python manage.py runserver
+```
+
+Or with the Makefile shortcut:
+```bash
+make dev   # does db + migrate + seed + runserver in one command
+```
+
+API running at: http://localhost:8000/api/v1/
+Admin: http://localhost:8000/admin → `admin@jambulani.com` / `admin123`
+
+---
+
+## Why uv instead of pip?
+
+This is the core fix for the wheel compilation errors reviewers hit with plain pip:
+
+| Problem with `pip install` | How `uv` solves it |
+|---|---|
+| `psycopg2-binary` fails on Python 3.14 — no pre-built wheel | `uv` resolves a compatible version automatically |
+| Pillow fails — "zlib not found", requires C compiler | `uv` always downloads a pre-built binary wheel |
+| "Microsoft Visual C++ 14.0 required" on Windows | `uv` never compiles from source |
+| Different behavior per machine (Python version, pip version) | `uv.lock` guarantees bit-for-bit identical installs everywhere |
+| Slow (Pillow is 46MB to compile) | `uv` is 10–100× faster than pip |
+
+The wheel errors you saw happen because `psycopg2-binary==2.9.9` and `Pillow==10.4.0` do not have pre-built binaries for Python 3.14. `uv` resolves `>=` ranges to a version that has a binary wheel for whatever Python you're running.
+
+---
+
+## Project Structure
+
+```
+backend/
+├── pyproject.toml          ← All dependencies declared here
+├── uv.lock                 ← Exact locked versions (committed to git)
+├── .python-version         ← Tells uv which Python version to use (3.11)
+├── .env.example            ← Copy to .env for local dev
+├── docker-compose.yml      ← Full stack (backend + db)
+├── docker-compose.db.yml   ← DB only (for local dev)
+├── Makefile                ← Developer shortcuts
+├── Dockerfile
+├── entrypoint.sh
+├── manage.py
+├── config/
+│   ├── settings.py         ← Single settings file, reads from .env
+│   └── urls.py
+├── accounts/               ← Auth app
+│   ├── models.py           ← Custom User + RefreshToken
+│   ├── authentication.py   ← JWT DRF authenticator
+│   ├── tokens.py           ← JWT issue/decode
+│   ├── serializers.py
+│   ├── views.py
+│   └── urls.py
+└── store/                  ← Product catalog app
+    ├── models.py
+    ├── serializers.py
+    ├── views.py
+    ├── admin.py
+    ├── filters.py
+    └── management/commands/seed_data.py
 ```
 
 ---
 
-## 🗄️ API Endpoints
+## API Reference
 
-All endpoints are prefixed with `/api/v1/`
+### Auth — `/api/v1/auth/`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/products/` | List products (filterable, searchable, paginated) |
-| `GET` | `/products/{slug}/` | Product detail |
-| `GET` | `/products/featured/` | Featured products |
-| `GET` | `/leagues/` | All leagues |
-| `GET` | `/leagues/{slug}/` | League detail |
-| `GET` | `/collections/` | All collections |
-| `GET` | `/categories/` | All categories |
-| `GET` | `/patches/` | Available patches |
-| `GET` | `/cart/` | Get current cart |
-| `POST` | `/cart/` | Add item to cart |
-| `PATCH` | `/cart/{id}/` | Update cart item quantity |
-| `DELETE` | `/cart/{id}/` | Remove item from cart |
-| `DELETE` | `/cart/clear/` | Clear entire cart |
-| `POST` | `/newsletter/subscribe/` | Subscribe to newsletter |
+| POST | `/auth/register/` | Create account |
+| POST | `/auth/login/` | Login → sets HttpOnly JWT cookies |
+| POST | `/auth/logout/` | Logout + revoke refresh token |
+| POST | `/auth/token/refresh/` | Silent token refresh (uses cookie) |
+| GET | `/auth/session/` | Check current session |
+| GET/PATCH | `/auth/me/` | Get / update profile |
+| POST | `/auth/password/change/` | Change password, revoke all sessions |
 
-### Product Filtering
+### Store — `/api/v1/`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/products/` | List products (filterable, paginated) |
+| GET | `/products/{slug}/` | Product detail |
+| GET | `/products/featured/` | Featured products |
+| GET | `/leagues/` | All leagues |
+| GET | `/collections/` | All collections |
+| GET | `/patches/` | All patches |
+| GET/POST | `/cart/` | Session cart |
+| PATCH/DELETE | `/cart/{id}/` | Update/remove item |
+| DELETE | `/cart/clear/` | Clear cart |
+| POST | `/newsletter/subscribe/` | Newsletter signup |
+
+**Filtering:**
 ```
-GET /api/v1/products/?league=england-premier-league&min_price=20&max_price=50&search=manchester&ordering=price&page=2
+GET /api/v1/products/?league=premier-league&min_price=20&max_price=80&search=arsenal&ordering=-price&page=2
 ```
 
 ---
 
-## 🛠️ Django Admin
+## Authentication Architecture
 
-Access at `http://localhost:8000/admin` with `admin` / `admin123`.
+Two-token system, zero secrets in localStorage:
 
-Manage from admin:
-- **Products** — Full catalog management with images, pricing, sizes, patches
-- **Leagues** — Country/competition leagues
-- **Collections** — Product collections (Kids, Goalkeeper, etc.)
-- **Categories** — Product categories
-- **Patches** — Available jersey patches with extra pricing
-- **Size Charts** — Size guide images per product
-- **Newsletter Subscribers** — Email list management
-- **Cart Items** — Active sessions
+| Token | Type | TTL | Storage |
+|-------|------|-----|---------|
+| Access token | Signed JWT (HS256) | 15 minutes | JS memory only |
+| Refresh token | Opaque SHA-256 hash | 30 days | HttpOnly cookie |
 
----
-
-## 🏗️ Tech Stack
-
-### Backend
-- **Django 5** + **Django REST Framework**
-- **PostgreSQL** (via psycopg2)
-- **django-filter** — Advanced filtering
-- **django-cors-headers** — CORS support
-- **Gunicorn** — Production WSGI server
-
-### Frontend
-- **Nuxt 3** (latest stable)
-- **Vue 3** with Composition API
-- **Pinia** — State management (cart)
-- **Tailwind CSS** — Utility-first styling
-- **TypeScript** — Full type safety
-- **@vueuse/core** — Composable utilities
-
-### Infrastructure
-- **Docker** + **Docker Compose**
-- **PostgreSQL 16**
+**Security features:**
+- Refresh token rotation on every `/token/refresh/` call
+- Token reuse detection — replay of a rotated token revokes the entire family
+- Password change revokes all active refresh token families
+- Auth endpoints rate-limited to 10 req/min (brute-force protection)
+- `Secure`, `HttpOnly`, `SameSite=Lax` cookie flags
+- Constant-time login (prevents user enumeration)
 
 ---
 
-## 🎨 Design Implementation
+## Troubleshooting
 
-The UI faithfully implements the provided Figma designs:
-- ✅ Announcement bar with language selector & WhatsApp chat button
-- ✅ Full navigation with search, cart icon with badge, account menu
-- ✅ Mobile-responsive hamburger menu
-- ✅ Hero banner with CTA
-- ✅ Trust badges (Shipping, Phone, WhatsApp, Quality)
-- ✅ Featured products carousel/grid
-- ✅ Country leagues grid with colored cards
-- ✅ Other collections grid
-- ✅ Personalization & Social Networks CTAs
-- ✅ 4-column footer with newsletter subscription
-- ✅ Product detail page with image gallery, size selection, customization fields
-- ✅ Cart drawer with quantity controls
-- ✅ Product listing page with filters and pagination
+**Port 5432 already in use:**
+Something else is using PostgreSQL. Either stop it, or change the port in `docker-compose.db.yml` and `.env`.
 
----
+**Port 8000 already in use:**
+```bash
+# macOS/Linux:
+lsof -ti:8000 | xargs kill
+# Windows PowerShell:
+netstat -ano | findstr :8000
+# then: taskkill /PID <pid> /F
+```
 
-## 📝 Notes
+**uv not found after install:**
+Restart your terminal. uv adds itself to PATH but the current session won't see it until you restart.
 
-- **Session-based cart**: No authentication required. Cart is stored server-side using Django sessions.
-- **Demo products**: The `seed_data` management command pre-populates leagues, collections, patches, and 6 sample products. Upload product images via Django Admin.
-- **Personalization**: Products support custom name and number printing (stored with cart items).
-- **Patches**: Each product can have selectable patches at an additional price.
+**Docker containers fail to start:**
+```bash
+docker compose down -v
+docker compose up --build
+```
