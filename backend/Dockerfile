@@ -1,24 +1,20 @@
-# syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /app
 
-# System deps for psycopg2-binary (pre-built wheel still needs libpq at runtime)
+# Runtime dependency for psycopg2-binary
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv — fastest Python package installer
-# Copies a single static binary from the official uv image
-COPY --from=ghcr.io/astral-sh/uv:0.5.29 /uv /usr/local/bin/uv
-
-# Install Python dependencies
-# uv always fetches pre-built wheels — never compiles from source
-COPY pyproject.toml .
-RUN uv pip install --system --no-cache .
+# Install dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 COPY . .
 
