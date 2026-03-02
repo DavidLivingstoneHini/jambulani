@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Barlow", sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-black font-display font-bold uppercase tracking-wider px-6 py-3
+           transition-all duration-200 hover:bg-primary-600 active:scale-95 cursor-pointer;
+  }
+
+  .btn-dark {
+    @apply bg-black text-white font-display font-bold uppercase tracking-wider px-6 py-3
+           transition-all duration-200 hover:bg-gray-800 active:scale-95 cursor-pointer;
+  }
+
+  .product-card {
+    @apply relative overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .section-title {
+    @apply font-display font-bold uppercase text-xl tracking-widest text-gray-900 mb-6;
+  }
+
+  .badge-save {
+    @apply bg-green-500 text-white text-xs font-bold px-2 py-1 uppercase;
+  }
+
+  .price-current {
+    @apply font-display font-bold text-2xl text-gray-900;
+  }
+
+  .price-original {
+    @apply text-red-500 line-through text-base font-body;
+  }
+
+  .form-input {
+    @apply w-full border border-gray-300 px-3 py-2 text-sm font-body
+           focus:outline-none focus:border-gray-600 transition-colors duration-150;
+  }
+
+  .form-select {
+    @apply w-full border border-gray-300 px-3 py-2 text-sm font-body bg-white
+           focus:outline-none focus:border-gray-600 appearance-none cursor-pointer;
+  }
+
+  .footer-link {
+    @apply text-gray-400 text-sm hover:text-white transition-colors duration-150;
+  }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #888; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
