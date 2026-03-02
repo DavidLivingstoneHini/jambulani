@@ -1,8 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: "2024-11-01",
+  compatibilityDate: '2024-11-01',
 
-  // Nuxt 4 compatibility mode
+  // Nuxt 4 app directory structure
   future: {
     compatibilityVersion: 4,
   },
@@ -10,54 +10,60 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
-    "@nuxtjs/tailwindcss",
-    "@pinia/nuxt",
-    "@nuxt/image",
-    "@vueuse/nuxt",
-    "@nuxtjs/google-fonts",
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+    '@nuxt/image',
+    '@vueuse/nuxt',
+    '@nuxtjs/google-fonts',
   ],
+
+  pinia: {
+    storesDirs: ['./app/stores/**'],
+  },
 
   googleFonts: {
     families: {
-      "Barlow Condensed": [400, 600, 700, 800],
+      'Barlow Condensed': [400, 600, 700, 800],
       Barlow: [300, 400, 500, 600],
-      "Bebas Neue": true,
+      'Bebas Neue': true,
     },
-    display: "swap",
+    display: 'swap',
+    preload: true,
   },
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8000/api/v1",
-      mediaBase: process.env.NUXT_PUBLIC_MEDIA_BASE || "http://localhost:8000",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api/v1',
+      mediaBase: process.env.NUXT_PUBLIC_MEDIA_BASE || 'http://localhost:8000',
     },
   },
 
   app: {
     head: {
-      title: "Jambulani — Customized Club Jerseys",
+      title: 'Jambulani — Customized Club Jerseys',
       meta: [
-        { charset: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
-          name: "description",
-          content: "Your favorite customized club jerseys. Free shipping on all orders.",
+          name: 'description',
+          content: 'Your favorite customized club jerseys. Free shipping on all orders.',
         },
       ],
-      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     },
   },
 
-  // In Nuxt 4, app/ is the default srcDir — no need to set srcDir explicitly
-  css: ["~/assets/css/main.css"],
+  css: ['~/assets/css/main.css'],
 
   image: {
-    domains: ["localhost"],
-    format: ["webp", "jpeg", "png"],
+    domains: ['localhost'],
+    format: ['webp', 'jpeg', 'png'],
   },
 
   typescript: {
     strict: true,
     typeCheck: false,
   },
-});
+
+  ssr: true,
+})

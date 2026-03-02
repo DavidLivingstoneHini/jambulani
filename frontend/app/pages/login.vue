@@ -105,7 +105,7 @@ const serverError = ref('')
 const showPassword = ref(false)
 
 async function handleLogin() {
-  Object.keys(errors).forEach(k => delete (errors as any)[k])
+  Object.keys(errors).forEach(k => { delete (errors as Record<string, string>)[k] })
   serverError.value = ''
 
   // Basic client-side validation
@@ -116,10 +116,10 @@ async function handleLogin() {
     await authStore.login({ email: form.email, password: form.password })
     const redirect = route.query.redirect as string
     router.push(redirect && redirect.startsWith('/') ? redirect : '/')
-  } catch (e: any) {
-    const data = e?.data
-    if (data?.email) { errors.email = Array.isArray(data.email) ? data.email[0] : data.email }
-    else if (data?.detail) { serverError.value = data.detail }
+  } catch (e: unknown) {
+    const data = (e as Record<string, Record<string, unknown>>)?.data
+    if (data?.email) { errors.email = Array.isArray(data.email) ? (data.email as string[])[0] : data.email as string }
+    else if (data?.detail) { serverError.value = data.detail as string }
     else if (data?.non_field_errors) { serverError.value = data.non_field_errors[0] }
     else { serverError.value = 'Login failed. Please try again.' }
   }

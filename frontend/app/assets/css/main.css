@@ -18,9 +18,11 @@
 }
 
 @layer components {
+  /* ── Buttons ─────────────────────────────── */
   .btn-primary {
     @apply bg-primary text-black font-display font-bold uppercase tracking-wider px-6 py-3
-           transition-all duration-200 hover:bg-primary-600 active:scale-95 cursor-pointer;
+           transition-all duration-200 hover:bg-primary-600 active:scale-95 cursor-pointer
+           inline-block text-center;
   }
 
   .btn-dark {
@@ -28,18 +30,22 @@
            transition-all duration-200 hover:bg-gray-800 active:scale-95 cursor-pointer;
   }
 
+  /* ── Product card ────────────────────────── */
   .product-card {
-    @apply relative overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1;
+    @apply relative overflow-hidden cursor-pointer;
   }
 
+  /* ── Section headings ────────────────────── */
   .section-title {
-    @apply font-display font-bold uppercase text-xl tracking-widest text-gray-900 mb-6;
+    @apply font-display font-bold uppercase text-[22px] tracking-[0.12em] text-gray-900 mb-6;
   }
 
+  /* ── Badges ──────────────────────────────── */
   .badge-save {
-    @apply bg-green-500 text-white text-xs font-bold px-2 py-1 uppercase;
+    @apply bg-green-500 text-white text-xs font-bold px-2 py-0.5 uppercase font-display;
   }
 
+  /* ── Prices ──────────────────────────────── */
   .price-current {
     @apply font-display font-bold text-2xl text-gray-900;
   }
@@ -48,22 +54,39 @@
     @apply text-red-500 line-through text-base font-body;
   }
 
+  /* ── Form elements ───────────────────────── */
   .form-input {
-    @apply w-full border border-gray-300 px-3 py-2 text-sm font-body
-           focus:outline-none focus:border-gray-600 transition-colors duration-150;
+    @apply w-full border border-gray-300 px-3 py-2.5 text-sm font-body
+           focus:outline-none focus:border-gray-600 transition-colors duration-150
+           rounded-none;
   }
 
   .form-select {
-    @apply w-full border border-gray-300 px-3 py-2 text-sm font-body bg-white
-           focus:outline-none focus:border-gray-600 appearance-none cursor-pointer;
+    @apply w-full border border-gray-300 px-3 py-2.5 text-sm font-body bg-white
+           focus:outline-none focus:border-gray-600 appearance-none cursor-pointer
+           rounded-none;
   }
 
+  /* ── Footer links ────────────────────────── */
   .footer-link {
-    @apply text-gray-400 text-sm hover:text-white transition-colors duration-150;
+    @apply text-gray-400 text-sm font-body hover:text-white transition-colors duration-150 cursor-pointer;
+  }
+
+  /* ── Nav link ────────────────────────────── */
+  .nav-link {
+    @apply text-[13px] text-gray-700 hover:text-gray-900 transition-colors duration-150 font-body;
   }
 }
 
+/* ── Scrollbar ───────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #888; }
 ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* ── Writing mode for Rewards tab ───────────── */
+.writing-vertical {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}

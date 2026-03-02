@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <LayoutAppHeader />
-    <main class="flex-1">
+  <div>
+    <AppHeader />
+    <CartDrawer />
+    <main>
       <slot />
     </main>
-    <LayoutAppFooter />
-    <CartCartDrawer />
+    <AppFooter />
   </div>
 </template>

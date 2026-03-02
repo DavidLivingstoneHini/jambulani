@@ -119,7 +119,7 @@ function passwordStrengthColor(bar: number) {
 }
 
 async function handleRegister() {
-  Object.keys(errors).forEach(k => delete (errors as any)[k])
+  Object.keys(errors).forEach(k => { delete (errors as Record<string, string>)[k] })
   serverError.value = ''
 
   if (form.password !== form.password_confirm) {
@@ -130,12 +130,12 @@ async function handleRegister() {
   try {
     await authStore.register({ ...form })
     router.push('/')
-  } catch (e: any) {
-    const data = e?.data
+  } catch (e: unknown) {
+    const data = (e as Record<string, unknown> | null)?.data as Record<string, unknown> | null
     if (data && typeof data === 'object') {
       Object.entries(data).forEach(([key, val]) => {
         if (key in form || key === 'password_confirm') {
-          (errors as any)[key] = Array.isArray(val) ? (val as string[])[0] : String(val)
+          (errors as Record<string, string>)[key] = Array.isArray(val) ? (val as string[])[0] : String(val)
         } else if (key === 'detail' || key === 'non_field_errors') {
           serverError.value = Array.isArray(val) ? (val as string[])[0] : String(val)
         }

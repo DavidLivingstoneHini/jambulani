@@ -80,8 +80,8 @@ export interface CartItem {
   id: number
   product: ProductList
   size: string
-  custom_name: string
-  custom_number: string
+  custom_name: string | null
+  custom_number: string | null
   patch: Patch | null
   quantity: number
   subtotal: string
@@ -107,12 +107,12 @@ export interface AuthUser {
   first_name: string
   last_name: string
   full_name: string
-  phone: string
-  address_line1: string
-  address_line2: string
-  city: string
-  postal_code: string
-  country: string
+  phone: string | null
+  address_line1: string | null
+  address_line2: string | null
+  city: string | null
+  postal_code: string | null
+  country: string | null
   date_joined: string
   is_staff: boolean
 }

@@ -1,76 +1,191 @@
 import { defineStore } from 'pinia'
-import type { Cart } from '~/app/types'
 
-export const useCartStore = defineStore('cart', () => {
-  const cart = ref<Cart>({ items: [], total: '0.00', count: 0 })
-  const isOpen = ref(false)
-  const loading = ref(false)
-  const { apiFetch } = useApi()
+interface CartProduct {
+  id: number
+  name: string
+  slug: string
+  price: string
+  original_price: string | null
+  discount_percentage: number
+  primary_image: string | null
+  league_name: string | null
+  category_name: string | null
+  is_featured: boolean
+}
 
-  async function fetchCart() {
-    loading.value = true
-    try {
-      const data = await apiFetch<Cart>('/cart/')
-      cart.value = data
-    } catch (e) {
-      console.error('Failed to fetch cart', e)
-    } finally {
-      loading.value = false
-    }
-  }
+interface CartPatch {
+  id: number
+  name: string
+  image: string | null
+  extra_price: string
+}
 
-  async function addItem(payload: {
-    product_id: number
-    size: string
-    quantity?: number
-    custom_name?: string
-    custom_number?: string
-    patch_id?: number | null
-  }) {
-    loading.value = true
-    try {
-      await apiFetch('/cart/', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      })
-      await fetchCart()
-      isOpen.value = true
-    } finally {
-      loading.value = false
-    }
-  }
+interface CartItem {
+  id: number
+  product: CartProduct
+  size: string
+  custom_name: string | null
+  custom_number: string | null
+  patch: CartPatch | null
+  quantity: number
+  subtotal: string
+}
 
-  async function updateQuantity(itemId: number, quantity: number) {
-    await apiFetch(`/cart/${itemId}/`, {
-      method: 'PATCH',
-      body: JSON.stringify({ quantity }),
-    })
-    await fetchCart()
-  }
+interface Cart {
+  items: CartItem[]
+  total: string
+  count: number
+}
 
-  async function removeItem(itemId: number) {
-    await apiFetch(`/cart/${itemId}/`, { method: 'DELETE' })
-    await fetchCart()
-  }
+interface AddItemPayload {
+  product_id: number
+  size: string
+  quantity: number
+  custom_name?: string
+  custom_number?: string
+  patch_id?: number | null
+}
 
-  async function clearCart() {
-    await apiFetch('/cart/clear/', { method: 'DELETE' })
-    await fetchCart()
-  }
+export const useCartStore = defineStore('cart', {
+  state: () => ({
+    cart: { items: [], total: '0.00', count: 0 } as Cart,
+    isOpen: false,
+    loading: false,
+  }),
 
-  const itemCount = computed(() => cart.value.count)
-  const cartTotal = computed(() => cart.value.total)
+  getters: {
+    itemCount: (state): number => state.cart.count,
+    cartTotal: (state): string => state.cart.total,
+  },
 
-  return {
-    cart,
-    isOpen,
-    loading,
-    itemCount,
-    cartTotal,
-    fetchCart,
-    addItem,
-    updateQuantity,
-    removeItem,
-    clearCart,
-  }
+  actions: {
+    async initOnClient() {
+      if (process.client) {
+        await this.fetchCart()
+      }
+    },
+
+    async fetchCart() {
+      if (!process.client) return
+
+      this.loading = true
+      try {
+        const config = useRuntimeConfig()
+        const baseURL = config.public.apiBase as string
+        const authStore = useAuthStore()
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        if (authStore.accessToken) {
+          headers['Authorization'] = `Bearer ${authStore.accessToken}`
+        }
+
+        const res = await fetch(`${baseURL}/cart/`, {
+          credentials: 'include',
+          headers,
+        })
+        if (res.ok) {
+          const data = await res.json() as Cart
+          this.cart = data
+        }
+      } catch (e) {
+        console.error('Failed to fetch cart', e)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async addItem(payload: AddItemPayload) {
+      if (!process.client) return
+
+      this.loading = true
+      try {
+        const config = useRuntimeConfig()
+        const baseURL = config.public.apiBase as string
+        const authStore = useAuthStore()
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        if (authStore.accessToken) {
+          headers['Authorization'] = `Bearer ${authStore.accessToken}`
+        }
+
+        const res = await fetch(`${baseURL}/cart/`, {
+          method: 'POST',
+          credentials: 'include',
+          headers,
+          body: JSON.stringify(payload),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw err
+        }
+        await this.fetchCart()
+        this.isOpen = true
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateQuantity(itemId: number, quantity: number) {
+      if (!process.client) return
+
+      try {
+        const config = useRuntimeConfig()
+        const baseURL = config.public.apiBase as string
+        const authStore = useAuthStore()
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        if (authStore.accessToken) {
+          headers['Authorization'] = `Bearer ${authStore.accessToken}`
+        }
+
+        const res = await fetch(`${baseURL}/cart/${itemId}/`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers,
+          body: JSON.stringify({ quantity }),
+        })
+        if (res.ok || res.status === 204) {
+          await this.fetchCart()
+        }
+      } catch (e) {
+        console.error('Failed to update quantity', e)
+      }
+    },
+
+    async removeItem(itemId: number) {
+      if (!process.client) return
+
+      try {
+        const config = useRuntimeConfig()
+        const baseURL = config.public.apiBase as string
+        const authStore = useAuthStore()
+
+        const headers: Record<string, string> = {}
+        if (authStore.accessToken) {
+          headers['Authorization'] = `Bearer ${authStore.accessToken}`
+        }
+
+        await fetch(`${baseURL}/cart/${itemId}/`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers,
+        })
+        await this.fetchCart()
+      } catch (e) {
+        console.error('Failed to remove item', e)
+      }
+    },
+
+    toggleCart() {
+      if (process.client) {
+        this.isOpen = !this.isOpen
+      }
+    },
+  },
 })

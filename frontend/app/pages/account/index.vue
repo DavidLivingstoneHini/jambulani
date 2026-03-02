@@ -174,8 +174,8 @@ async function handleUpdateProfile() {
     await authStore.updateProfile({ ...profileForm })
     profileSuccess.value = true
     setTimeout(() => (profileSuccess.value = false), 4000)
-  } catch (e: any) {
-    profileError.value = e?.data?.detail || 'Failed to update profile.'
+  } catch (e: unknown) {
+    profileError.value = ((e as Record<string, Record<string, string>>)?.data?.detail) ?? 'Failed to update profile.'
   } finally {
     profileLoading.value = false
   }
@@ -189,18 +189,18 @@ const pwSuccess = ref(false)
 const pwError = ref('')
 
 async function handleChangePassword() {
-  Object.keys(pwErrors).forEach(k => delete (pwErrors as any)[k])
+  Object.keys(pwErrors).forEach(k => delete ( pwErrors as Record<string, string>)[k])
   pwError.value = ''
   pwLoading.value = true
   try {
     await authStore.changePassword({ ...pwForm })
     pwSuccess.value = true
     setTimeout(() => router.push('/login'), 2000)
-  } catch (e: any) {
-    const data = e?.data
+  } catch (e: unknown) {
+    const data = (e as Record<string, unknown>)?.data as Record<string, unknown> | undefined
     if (data) {
       Object.entries(data).forEach(([k, v]) => {
-        (pwErrors as any)[k] = Array.isArray(v) ? (v as string[])[0] : String(v)
+        ( pwErrors as Record<string, string>)[k] = Array.isArray(v) ? (v as string[])[0] : String(v)
       })
     }
     if (Object.keys(pwErrors).length === 0) pwError.value = 'Failed to change password.'

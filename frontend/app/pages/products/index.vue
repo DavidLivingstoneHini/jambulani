@@ -13,23 +13,47 @@
           <h3 class="font-display font-bold uppercase text-sm tracking-wider mb-4">Filters</h3>
 
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">Search</label>
-            <input v-model="filters.search" type="text" placeholder="Search products..." class="form-input text-xs" @input="debouncedFetch" />
+            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+              Search
+            </label>
+            <input
+              v-model="filters.search"
+              type="text"
+              placeholder="Search products..."
+              class="form-input text-xs"
+              @input="debouncedFetch"
+            />
           </div>
 
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">League</label>
-            <select v-model="filters.league" class="form-select text-xs" @change="fetchProducts">
+            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+              League
+            </label>
+            <select v-model="filters.league" class="form-select text-xs" @change="doFetch">
               <option value="">All Leagues</option>
               <option v-for="l in leagues" :key="l.id" :value="l.slug">{{ l.name }}</option>
             </select>
           </div>
 
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">Price Range</label>
+            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+              Price Range
+            </label>
             <div class="flex gap-2">
-              <input v-model.number="filters.min_price" type="number" placeholder="Min" class="form-input text-xs w-1/2" @change="fetchProducts" />
-              <input v-model.number="filters.max_price" type="number" placeholder="Max" class="form-input text-xs w-1/2" @change="fetchProducts" />
+              <input
+                v-model.number="filters.min_price"
+                type="number"
+                placeholder="Min"
+                class="form-input text-xs w-1/2"
+                @change="doFetch"
+              />
+              <input
+                v-model.number="filters.max_price"
+                type="number"
+                placeholder="Max"
+                class="form-input text-xs w-1/2"
+                @change="doFetch"
+              />
             </div>
           </div>
 
@@ -43,7 +67,7 @@
           <p class="text-sm text-gray-500 font-body">
             <span v-if="!pending">{{ totalCount }} products</span>
           </p>
-          <select v-model="ordering" class="form-select text-sm w-48" @change="fetchProducts">
+          <select v-model="ordering" class="form-select text-sm w-48" @change="doFetch">
             <option value="-created_at">Newest First</option>
             <option value="price">Price: Low to High</option>
             <option value="-price">Price: High to Low</option>
@@ -54,8 +78,8 @@
         <div v-if="pending" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div v-for="n in 8" :key="n" class="animate-pulse">
             <div class="aspect-square bg-gray-200 mb-2" />
-            <div class="h-4 bg-gray-200 mb-1" />
-            <div class="h-4 w-1/2 bg-gray-200" />
+            <div class="h-4 bg-gray-200 mb-1 rounded" />
+            <div class="h-4 w-1/2 bg-gray-200 rounded" />
           </div>
         </div>
 
@@ -65,7 +89,7 @@
         </div>
 
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <ProductProductCard v-for="product in products" :key="product.id" :product="product" />
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
 
         <!-- Pagination -->
@@ -106,9 +130,9 @@ const currentPage = ref(1)
 const ordering = ref('-created_at')
 
 const filters = reactive({
-  search: (route.query.search as string) || '',
-  league: (route.query.league as string) || '',
-  collection: (route.query.collection as string) || '',
+  search: (route.query.search as string) ?? '',
+  league: (route.query.league as string) ?? '',
+  collection: (route.query.collection as string) ?? '',
   min_price: '' as string | number,
   max_price: '' as string | number,
 })
@@ -122,17 +146,20 @@ const visiblePages = computed(() => {
   return pages
 })
 
-const { data: leaguesData } = await useAsyncData('leagues-filter', () => apiFetch<League[]>('/leagues/'))
-const leagues = computed(() => leaguesData.value || [])
+const { data: leaguesData } = await useAsyncData(
+  'leagues-filter',
+  () => apiFetch<League[]>('/leagues/').catch(() => [] as League[])
+)
+const leagues = computed<League[]>(() => leaguesData.value ?? [])
 
-async function fetchProducts() {
+async function doFetch() {
   pending.value = true
   const params = new URLSearchParams()
   if (filters.search) params.set('search', filters.search)
   if (filters.league) params.set('league', filters.league)
   if (filters.collection) params.set('collection', filters.collection)
-  if (filters.min_price) params.set('min_price', String(filters.min_price))
-  if (filters.max_price) params.set('max_price', String(filters.max_price))
+  if (filters.min_price !== '') params.set('min_price', String(filters.min_price))
+  if (filters.max_price !== '') params.set('max_price', String(filters.max_price))
   params.set('ordering', ordering.value)
   params.set('page', String(currentPage.value))
 
@@ -141,7 +168,9 @@ async function fetchProducts() {
     products.value = data.results
     totalCount.value = data.count
   } catch (e) {
-    console.error(e)
+    console.error('Failed to fetch products', e)
+    products.value = []
+    totalCount.value = 0
   } finally {
     pending.value = false
   }
@@ -154,25 +183,25 @@ function clearFilters() {
   filters.min_price = ''
   filters.max_price = ''
   currentPage.value = 1
-  fetchProducts()
+  doFetch()
 }
 
 function goToPage(page: number) {
   currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-  fetchProducts()
+  if (process.client) window.scrollTo({ top: 0, behavior: 'smooth' })
+  doFetch()
 }
 
-let debounceTimer: ReturnType<typeof setTimeout>
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 function debouncedFetch() {
-  clearTimeout(debounceTimer)
+  if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     currentPage.value = 1
-    fetchProducts()
+    doFetch()
   }, 400)
 }
 
-onMounted(() => fetchProducts())
+onMounted(() => doFetch())
 
 useHead({ title: 'Products — Jambulani' })
 </script>
