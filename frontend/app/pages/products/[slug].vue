@@ -1,278 +1,300 @@
 <template>
-  <div>
-    <div class="max-w-screen-xl mx-auto px-4 py-6">
+  <div class="max-w-screen-xl mx-auto px-4 py-6">
 
-      <!-- Breadcrumb -->
-      <nav v-if="product" class="flex items-center flex-wrap gap-1 text-[13px] font-body mb-6">
-        <NuxtLink to="/" class="text-[#0066cc] hover:underline">Home</NuxtLink>
-        <span class="text-gray-400 mx-0.5">›</span>
-        <NuxtLink
-          v-if="product.league"
-          :to="`/products?league=${product.league.slug}`"
-          class="text-[#0066cc] hover:underline"
-        >{{ product.league.name }}</NuxtLink>
-        <span v-if="product.league" class="text-gray-400 mx-0.5">›</span>
-        <span class="text-gray-700">{{ product.name }}</span>
-      </nav>
+    <!-- Breadcrumb -->
+    <nav v-if="product" class="flex items-center flex-wrap gap-1 text-[13px] font-body mb-6">
+      <NuxtLink to="/" class="text-[#0066cc] hover:underline">Home</NuxtLink>
+      <span class="text-gray-400 mx-0.5">›</span>
+      <NuxtLink
+        v-if="product.league"
+        :to="`/products?league=${product.league.slug}`"
+        class="text-[#0066cc] hover:underline"
+      >{{ product.league.name }}</NuxtLink>
+      <span v-if="product.league" class="text-gray-400 mx-0.5">›</span>
+      <span class="text-gray-700">{{ product.name }}</span>
+    </nav>
 
-      <!-- Loading skeleton -->
-      <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
-        <div>
-          <div class="aspect-square bg-gray-200 mb-3" />
-          <div class="flex gap-2">
-            <div v-for="n in 6" :key="n" class="w-[68px] h-[68px] bg-gray-200 shrink-0" />
+    <!-- Skeleton -->
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
+      <div>
+        <div class="aspect-square bg-gray-200 mb-3" />
+        <div class="flex gap-2">
+          <div v-for="n in 6" :key="n" class="w-[68px] h-[68px] bg-gray-200 shrink-0" />
+        </div>
+      </div>
+      <div class="space-y-4 pt-2">
+        <div class="h-8 bg-gray-200 w-3/4 rounded" />
+        <div class="h-10 bg-gray-200 w-1/2 rounded" />
+        <div class="h-20 bg-gray-200 rounded" />
+        <div class="h-10 bg-gray-200 rounded" />
+        <div class="h-10 bg-gray-200 rounded" />
+        <div class="h-10 bg-gray-200 rounded" />
+        <div class="h-12 bg-gray-200 rounded" />
+      </div>
+    </div>
+
+    <!-- Product detail -->
+    <div v-else-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+      <!-- ── LEFT: Images ── -->
+      <div>
+        <!-- Main image -->
+        <div class="relative overflow-hidden bg-gray-100 mb-2" style="aspect-ratio: 1/1;">
+          <img
+            v-if="selectedImage || product.images[0]?.image"
+            :src="selectedImage || product.images[0]?.image"
+            :alt="product.name"
+            class="w-full h-full object-cover"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center">
+            <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0
+                   012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2
+                   2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+
+          <!-- Prev/Next arrows -->
+          <template v-if="product.images.length > 1">
+            <button
+              class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2
+                     hover:bg-black/75 transition-colors z-10"
+              aria-label="Previous image"
+              @click="prevImage"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2
+                     hover:bg-black/75 transition-colors z-10"
+              aria-label="Next image"
+              @click="nextImage"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </template>
+
+          <!-- Down-chevron bottom-centre (matches design) -->
+          <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 z-10">
+            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
         </div>
-        <div class="space-y-4 pt-2">
-          <div class="h-8 bg-gray-200 w-3/4 rounded" />
-          <div class="h-10 bg-gray-200 w-1/2 rounded" />
-          <div class="h-20 bg-gray-200 rounded" />
-          <div class="h-10 bg-gray-200 rounded" />
-          <div class="h-10 bg-gray-200 rounded" />
-          <div class="h-10 bg-gray-200 rounded" />
-          <div class="h-12 bg-gray-200 rounded" />
+
+        <!-- Thumbnail strip -->
+        <div class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width: thin;">
+          <button
+            v-for="img in product.images"
+            :key="img.id"
+            class="w-[68px] h-[68px] shrink-0 border-2 overflow-hidden transition-colors cursor-pointer"
+            :class="selectedImage === img.image
+              ? 'border-gray-900'
+              : 'border-gray-200 hover:border-gray-400'"
+            @click="selectImage(img.image)"
+          >
+            <img :src="img.image" :alt="img.alt_text" class="w-full h-full object-cover" />
+          </button>
         </div>
       </div>
 
-      <!-- ─────────────── PRODUCT LAYOUT ─────────────── -->
-      <div v-else-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-        <!-- ══ LEFT: Images ══ -->
-        <div>
-          <!-- Main image box -->
-          <div class="relative overflow-hidden bg-gray-100 mb-2" style="aspect-ratio:1/1;">
-            <img
-              v-if="selectedImage || product.images[0]?.image"
-              :src="selectedImage || product.images[0]?.image"
-              :alt="product.name"
-              class="w-full h-full object-cover"
-            />
-            <div v-else class="w-full h-full flex items-center justify-center bg-gray-100">
-              <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
+      <!-- ── RIGHT: Info ── -->
+      <div class="pt-1">
 
-            <!-- Prev / next arrows (only when multiple images) -->
-            <template v-if="product.images.length > 1">
-              <button
-                class="img-arrow left-2"
-                aria-label="Previous image"
-                @click="prevImage"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                class="img-arrow right-2"
-                aria-label="Next image"
-                @click="nextImage"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </template>
+        <!-- Name -->
+        <h1 class="font-display font-bold text-[26px] md:text-[30px] uppercase leading-tight
+                   text-gray-900 mb-4">
+          {{ product.name }}
+        </h1>
 
-            <!-- Down-chevron indicator (bottom centre, matches design) -->
-            <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 z-10">
-              <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Thumbnail strip — horizontal scroll, 68×68 squares -->
-          <div class="flex gap-2 overflow-x-auto pb-1 thumb-strip">
-            <button
-              v-for="img in product.images"
-              :key="img.id"
-              class="thumb-btn"
-              :class="selectedImage === img.image ? 'thumb-active' : 'thumb-inactive'"
-              @click="selectImage(img.image)"
-            >
-              <img :src="img.image" :alt="img.alt_text" class="w-full h-full object-cover" />
-            </button>
-          </div>
+        <!-- Price + save badge + favourites -->
+        <div class="flex items-center gap-3 flex-wrap mb-5">
+          <span class="font-display font-bold text-[36px] leading-none text-gray-900">
+            €{{ product.price }}
+          </span>
+          <span v-if="product.original_price"
+                class="text-red-500 line-through text-[16px] font-body">
+            €{{ product.original_price }}
+          </span>
+          <span v-if="product.discount_percentage > 0"
+                class="bg-green-500 text-white text-[11px] font-bold px-2 py-0.5 uppercase font-display">
+            Save {{ product.discount_percentage }}%
+          </span>
+          <button class="ml-auto flex items-center gap-1.5 text-gray-500 hover:text-gray-800
+                         transition-colors text-[13px] font-body border border-gray-300 px-3 py-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0
+                   00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            Add to Favorites
+          </button>
         </div>
 
+        <!-- Description -->
+        <div class="mb-6">
+          <p class="font-body text-gray-600 text-[13px] leading-[1.65]">
+            {{ showFullDesc ? product.description : truncated }}
+            <button
+              v-if="product.description.length > 200 && !showFullDesc"
+              class="text-[13px] text-gray-900 font-body font-semibold hover:underline ml-0.5"
+              @click="showFullDesc = true"
+            >Read More</button>
+            <button
+              v-if="showFullDesc"
+              class="text-[13px] text-gray-900 font-body font-semibold hover:underline ml-0.5"
+              @click="showFullDesc = false"
+            >Read Less</button>
+          </p>
+        </div>
 
-        <!-- ══ RIGHT: Product info ══ -->
-        <div class="pt-1">
-
-          <!-- Product name -->
-          <h1 class="font-display font-bold text-[26px] md:text-[30px] uppercase leading-tight text-gray-900 mb-4">
-            {{ product.name }}
-          </h1>
-
-          <!-- Price row -->
-          <div class="flex items-center gap-3 flex-wrap mb-5">
-            <span class="font-display font-bold text-[36px] leading-none text-gray-900">€{{ product.price }}</span>
-            <span v-if="product.original_price" class="text-red-500 line-through text-[16px] font-body">€{{ product.original_price }}</span>
-            <span v-if="product.discount_percentage > 0" class="bg-green-500 text-white text-[11px] font-bold px-2 py-0.5 uppercase font-display">
-              Save {{ product.discount_percentage }}%
-            </span>
-            <!-- Favourites — far right -->
-            <button class="ml-auto flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors text-[13px] font-body border border-gray-300 px-3 py-1.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              Add to Favorites
-            </button>
-          </div>
-
-          <!-- Description with Read More -->
-          <div class="mb-6">
-            <p class="font-body text-gray-600 text-[13px] leading-[1.65]">
-              {{ showFullDesc ? product.description : truncated }}
-              <button
-                v-if="product.description.length > 200 && !showFullDesc"
-                class="text-[13px] text-gray-900 font-body font-semibold hover:underline ml-0.5"
-                @click="showFullDesc = true"
-              >Read More</button>
-              <button
-                v-if="showFullDesc"
-                class="text-[13px] text-gray-900 font-body font-semibold hover:underline ml-0.5"
-                @click="showFullDesc = false"
-              >Read Less</button>
-            </p>
-          </div>
-
-          <!-- ── Form fields ── -->
-
-          <!-- Size -->
-          <div class="form-row">
-            <label class="field-label">
-              Size <span class="text-red-500">*</span>
-            </label>
-            <div class="flex gap-2">
-              <div class="relative flex-1">
-                <select v-model="form.size" class="form-select pr-9">
-                  <option value="" disabled>Select a shirt size</option>
-                  <option v-for="size in product.available_sizes" :key="size" :value="size">{{ size }}</option>
-                </select>
-                <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                  <svg class="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <button
-                v-if="product.size_chart"
-                class="border border-gray-900 px-3 py-2 text-[11px] font-display font-bold uppercase hover:bg-gray-100 transition-colors whitespace-nowrap"
-                @click="showSizeChart = true"
-              >View Size Chart</button>
-            </div>
-          </div>
-
-          <!-- Name -->
-          <div v-if="product.allow_name_customization" class="form-row">
-            <label class="field-label">Name</label>
-            <input
-              v-model="form.custom_name"
-              type="text"
-              placeholder="What name would you want in the shirt?"
-              class="form-input"
-              maxlength="100"
-            />
-          </div>
-
-          <!-- Number on Shirt -->
-          <div v-if="product.allow_number_customization" class="form-row">
-            <label class="field-label">Number on Shirt</label>
-            <input
-              v-model="form.custom_number"
-              type="number"
-              placeholder="Enter a number between 0 and 99"
-              class="form-input"
-              min="0"
-              max="99"
-            />
-          </div>
-
-          <!-- Patch -->
-          <div v-if="product.patches.length > 0" class="form-row">
-            <label class="field-label">Patch</label>
-            <div class="relative">
-              <select v-model="form.patch_id" class="form-select pr-9">
-                <option :value="null">Select a patch</option>
-                <option v-for="patch in product.patches" :key="patch.id" :value="patch.id">
-                  {{ patch.name }}<template v-if="+patch.extra_price > 0"> (+€{{ patch.extra_price }})</template>
+        <!-- Size -->
+        <div class="flex items-start gap-4 mb-4">
+          <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5">
+            Size <span class="text-red-500">*</span>
+          </label>
+          <div class="flex gap-2 flex-1">
+            <div class="relative flex-1">
+              <select v-model="form.size" class="form-select pr-9">
+                <option value="" disabled>Select a shirt size</option>
+                <option v-for="size in product.available_sizes" :key="size" :value="size">
+                  {{ size }}
                 </option>
               </select>
               <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
                 <svg class="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414
+                       1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </div>
             </div>
+            <button
+              v-if="product.size_chart"
+              class="border border-gray-900 px-3 py-2 text-[11px] font-display font-bold
+                     uppercase hover:bg-gray-100 transition-colors whitespace-nowrap"
+              @click="showSizeChart = true"
+            >View Size Chart</button>
           </div>
+        </div>
 
-          <!-- Quantity -->
-          <div class="form-row">
-            <label class="field-label">Quantity</label>
-            <div class="flex items-center border border-gray-300 w-[110px]">
-              <button
-                class="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-lg"
-                @click="form.quantity = Math.max(1, form.quantity - 1)"
-              >−</button>
-              <span class="flex-1 text-center font-body text-[13px] border-x border-gray-300 h-9 flex items-center justify-center select-none">
-                {{ form.quantity }}
-              </span>
-              <button
-                class="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-lg"
-                @click="form.quantity++"
-              >+</button>
-            </div>
-          </div>
+        <!-- Name customisation -->
+        <div v-if="product.allow_name_customization" class="flex items-start gap-4 mb-4">
+          <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5">Name</label>
+          <input
+            v-model="form.custom_name"
+            type="text"
+            placeholder="What name would you want in the shirt?"
+            class="form-input flex-1"
+            maxlength="100"
+          />
+        </div>
 
-          <!-- Feedback -->
-          <p v-if="formError" class="text-red-500 text-[13px] font-body mb-3">{{ formError }}</p>
-          <p v-if="addedSuccess" class="text-green-600 text-[13px] font-body mb-3">✓ Added to cart successfully!</p>
+        <!-- Number on shirt -->
+        <div v-if="product.allow_number_customization" class="flex items-start gap-4 mb-4">
+          <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5">
+            Number on Shirt
+          </label>
+          <input
+            v-model="form.custom_number"
+            type="number"
+            placeholder="Enter a number between 0 and 99"
+            class="form-input flex-1"
+            min="0"
+            max="99"
+          />
+        </div>
 
-          <!-- Add to Cart button — yellow left, black cart icon right -->
-          <button
-            class="w-full flex items-center justify-between bg-primary hover:bg-primary-600 transition-colors cursor-pointer disabled:opacity-50 mt-2"
-            :disabled="cartStore.loading"
-            @click="handleAddToCart"
-          >
-            <span class="font-display font-bold uppercase text-[15px] tracking-wider text-black px-6 py-4">
-              {{ cartStore.loading ? 'Adding...' : 'Add to Cart' }}
-            </span>
-            <div class="bg-black h-full px-4 py-4 flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        <!-- Patch -->
+        <div v-if="product.patches.length > 0" class="flex items-start gap-4 mb-4">
+          <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5">Patch</label>
+          <div class="relative flex-1">
+            <select v-model="form.patch_id" class="form-select pr-9">
+              <option :value="null">Select a patch</option>
+              <option v-for="patch in product.patches" :key="patch.id" :value="patch.id">
+                {{ patch.name }}<template v-if="+patch.extra_price > 0">
+                  (+€{{ patch.extra_price }})
+                </template>
+              </option>
+            </select>
+            <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+              <svg class="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414
+                     1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
             </div>
-          </button>
-
+          </div>
         </div>
-      </div>
 
-      <!-- 404 -->
-      <div v-else-if="!pending" class="text-center py-16">
-        <p class="font-display font-bold text-xl mb-4 uppercase">Product not found</p>
-        <NuxtLink to="/products" class="inline-block bg-primary text-black font-display font-bold uppercase px-6 py-3">
-          Back to Products
-        </NuxtLink>
+        <!-- Quantity -->
+        <div class="flex items-start gap-4 mb-6">
+          <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2">
+            Quantity
+          </label>
+          <div class="flex items-center border border-gray-300 w-[110px]">
+            <button
+              class="w-9 h-9 flex items-center justify-center text-gray-600
+                     hover:bg-gray-100 transition-colors text-lg"
+              @click="form.quantity = Math.max(1, form.quantity - 1)"
+            >−</button>
+            <span class="flex-1 text-center font-body text-[13px] border-x border-gray-300
+                         h-9 flex items-center justify-center select-none">
+              {{ form.quantity }}
+            </span>
+            <button
+              class="w-9 h-9 flex items-center justify-center text-gray-600
+                     hover:bg-gray-100 transition-colors text-lg"
+              @click="form.quantity++"
+            >+</button>
+          </div>
+        </div>
+
+        <!-- Validation / success feedback -->
+        <p v-if="formError" class="text-red-500 text-[13px] font-body mb-3">{{ formError }}</p>
+        <p v-if="addedSuccess" class="text-green-600 text-[13px] font-body mb-3">
+          ✓ Added to cart successfully!
+        </p>
+
+        <!-- Add to Cart — yellow left block + black cart icon right -->
+        <button
+          class="w-full flex items-center justify-between bg-primary hover:bg-primary-600
+                 transition-colors cursor-pointer disabled:opacity-50"
+          :disabled="cartStore.loading"
+          @click="handleAddToCart"
+        >
+          <span class="font-display font-bold uppercase text-[15px] tracking-wider text-black px-6 py-4">
+            {{ cartStore.loading ? 'Adding...' : 'Add to Cart' }}
+          </span>
+          <div class="bg-black h-full px-4 py-4 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184
+                   1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+        </button>
+
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════
-         REWARDS TAB — inline, left-aligned, below product content
-         Matches the design: yellow tab with star + "Rewards" text
-    ══════════════════════════════════════════════════ -->
-    <div v-if="product" class="relative h-14">
-      <div class="rewards-tab-product">
-        <svg class="w-4 h-4 text-black shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-        <span class="font-display font-bold text-[12px] uppercase tracking-wider text-black">Rewards</span>
-      </div>
+    <!-- 404 -->
+    <div v-else-if="!pending" class="text-center py-16">
+      <p class="font-display font-bold text-xl mb-4 uppercase">Product not found</p>
+      <NuxtLink to="/products"
+                class="inline-block bg-primary text-black font-display font-bold uppercase px-6 py-3">
+        Back to Products
+      </NuxtLink>
     </div>
 
-    <!-- Size chart modal -->
+
+    <!-- Size Chart Modal -->
     <Transition name="fade">
       <div
         v-if="showSizeChart && product?.size_chart"
@@ -281,7 +303,9 @@
       >
         <div class="bg-white max-w-lg w-full p-6">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-display font-bold uppercase text-base tracking-wide">{{ product.size_chart.name }}</h3>
+            <h3 class="font-display font-bold uppercase text-base tracking-wide">
+              {{ product.size_chart.name }}
+            </h3>
             <button class="p-1 hover:bg-gray-100 transition-colors" @click="showSizeChart = false">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -289,7 +313,9 @@
             </button>
           </div>
           <img :src="product.size_chart.image" :alt="product.size_chart.name" class="w-full" />
-          <p v-if="product.size_chart.description" class="mt-3 text-sm font-body text-gray-600">{{ product.size_chart.description }}</p>
+          <p v-if="product.size_chart.description" class="mt-3 text-sm font-body text-gray-600">
+            {{ product.size_chart.description }}
+          </p>
         </div>
       </div>
     </Transition>
@@ -343,7 +369,8 @@ function selectImage(src: string) {
 }
 function prevImage() {
   if (!product.value?.images.length) return
-  imageIndex.value = (imageIndex.value - 1 + product.value.images.length) % product.value.images.length
+  imageIndex.value =
+    (imageIndex.value - 1 + product.value.images.length) % product.value.images.length
   selectedImage.value = product.value.images[imageIndex.value]?.image ?? null
 }
 function nextImage() {
@@ -380,35 +407,6 @@ useHead({
 </script>
 
 <style scoped>
-/* Image arrows */
-.img-arrow {
-  @apply absolute top-1/2 -translate-y-1/2 bg-black/50 text-white p-2
-         hover:bg-black/75 transition-colors z-10;
-}
-
-/* Thumbnail strip */
-.thumb-strip { scrollbar-width: thin; }
-.thumb-btn {
-  @apply w-[68px] h-[68px] shrink-0 border-2 overflow-hidden transition-colors cursor-pointer;
-}
-.thumb-active  { @apply border-gray-900; }
-.thumb-inactive { @apply border-gray-200 hover:border-gray-400; }
-
-/* Form rows */
-.form-row {
-  @apply flex items-start gap-4 mb-4;
-}
-.field-label {
-  @apply font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5;
-}
-
-/* Rewards tab on product page — inline left tab */
-.rewards-tab-product {
-  @apply absolute left-0 top-1/2 -translate-y-1/2 bg-primary flex items-center gap-2
-         px-4 py-2.5 shadow cursor-pointer hover:bg-primary-600 transition-colors;
-}
-
-/* Fade transition for size chart modal */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-from, .fade-leave-to       { opacity: 0; }
 </style>

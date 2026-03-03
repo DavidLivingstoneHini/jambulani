@@ -1,257 +1,297 @@
 # Jambulani — Customized Football Jerseys
 
-Full-stack e-commerce application for customized club jerseys.
+Full-stack e-commerce app: **Nuxt 4** frontend + **Django REST Framework** backend.  
+Custom jersey ordering with name, number, patch personalisation.
 
-**Stack:** Nuxt 4 · Vue 3 · Django REST Framework · PostgreSQL · JWT Auth · Docker
+---
+
+## Tech Stack
+
+| Layer     | Technology |
+|-----------|-----------|
+| Frontend  | Nuxt 4 (Vue 3 + TypeScript), Tailwind CSS, Pinia |
+| Backend   | Django 4.2, Django REST Framework, PostgreSQL |
+| Auth      | JWT (djangorestframework-simplejwt) |
+| Dev infra | Docker Compose |
+
+---
+
+## Prerequisites
+
+Install these before starting:
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose)
+- [Node.js 20+](https://nodejs.org/) and npm
+- [Python 3.11+](https://www.python.org/) (only needed for local backend dev; Docker handles prod)
+
+---
+
+## Quickstart (Recommended — Docker for DB, local for app servers)
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/YOUR_USERNAME/jambulani.git
+cd jambulani
+```
+
+### 2. Start PostgreSQL via Docker
+```bash
+cd backend
+docker compose -f docker-compose.db.yml up -d
+```
+
+This starts a Postgres container on port **5432** with:
+- Database: `jambulani`
+- User: `jambulani`
+- Password: `jambulani`
+
+### 3. Set up the backend
+```bash
+cd backend
+
+# Copy environment file
+cp .env.example .env
+
+# Create a Python virtual environment
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run database migrations
+python manage.py migrate
+
+# Seed the database with sample products, leagues, collections, patches
+python manage.py seed_data
+
+# Create an admin superuser (follow the prompts)
+python manage.py createsuperuser
+
+# Start the backend server
+python manage.py runserver
+```
+
+Backend runs at: **http://localhost:8000**  
+Django admin: **http://localhost:8000/admin**
+
+### 4. Set up the frontend
+
+Open a **new terminal tab**:
+```bash
+cd frontend
+
+# Copy environment file
+cp .env.example .env
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+Frontend runs at: **http://localhost:3000**
+
+---
+
+## Full Docker Setup (optional — runs everything in containers)
+
+If you prefer to run everything in Docker:
+```bash
+# From the repo root
+docker compose up --build
+```
+
+Services:
+- **db** — PostgreSQL on port 5432
+- **backend** — Django on port 8000
+- **frontend** — Nuxt on port 3000
+
+Then seed data in the running backend container:
+```bash
+docker compose exec backend python manage.py seed_data
+docker compose exec backend python manage.py createsuperuser
+```
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+```env
+SECRET_KEY=your-secret-key-change-in-production
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+DB_NAME=jambulani
+DB_USER=jambulani
+DB_PASSWORD=jambulani
+DB_HOST=localhost        # use "db" if running inside Docker Compose
+DB_PORT=5432
+
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+MEDIA_URL=/media/
+```
+
+### Frontend (`frontend/.env`)
+```env
+NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
+NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000
+```
+
+---
+
+## Static Images (Leagues, Collections, Hero)
+
+The homepage uses static images you place in:
+```
+frontend/public/assets/images/
+├── hero-banner.jpg               ← Hero section background
+├── personalization-bg.jpg        ← Personalization card background
+├── social-bg.jpg                 ← Social Networks card background
+│
+├── leagues/
+│   ├── champions-league.jpg
+│   ├── europa-league.jpg
+│   ├── copa-america.jpg
+│   ├── asian-cup.jpg
+│   └── african-nations-cup.jpg
+│
+└── collections/
+    ├── kids.jpg
+    ├── large-sizes.jpg
+    ├── goalkeeper.jpg
+    ├── authentic-pro-player.jpg
+    ├── shorts.jpg
+    └── socks.jpg
+```
+
+Until images are added, coloured fallback backgrounds display automatically.
+
+---
+
+## Product Images (Dynamic / Seeded)
+
+Product images are managed through Django Admin:
+
+1. Go to **http://localhost:8000/admin**
+2. Log in with your superuser credentials
+3. Navigate to **Store → Products**
+4. Select a product → scroll to **Product Images** → upload images
+
+Images are served from `/media/` by the Django dev server.
+
+The `seed_data` command creates 16 products (8 featured) with placeholder data — you can add real images through admin.
+
+---
+
+## API Endpoints
+
+All endpoints are prefixed with `/api/v1/`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/products/` | List all products (supports `?search=`, `?league=`, `?collection=`) |
+| `GET` | `/products/featured/` | Featured products for homepage |
+| `GET` | `/products/{slug}/` | Single product detail |
+| `GET` | `/leagues/` | All leagues |
+| `GET` | `/collections/` | All collections |
+| `GET` | `/cart/` | Get current cart |
+| `POST` | `/cart/items/` | Add item to cart |
+| `PATCH` | `/cart/items/{id}/` | Update cart item quantity |
+| `DELETE` | `/cart/items/{id}/` | Remove cart item |
+| `POST` | `/auth/register/` | Register new user |
+| `POST` | `/auth/login/` | Login (returns JWT tokens) |
+| `POST` | `/auth/logout/` | Logout |
+| `GET/PUT` | `/auth/profile/` | Get/update user profile |
+
+---
+
+## Django Admin
+
+The admin panel at **http://localhost:8000/admin** lets you manage:
+
+- **Products** — name, price, description, images, sizes, discount, featured flag
+- **Leagues** — name, slug, sort order
+- **Collections** — name, slug, sort order
+- **Patches** — name, extra price
+- **Size Charts** — name, image, description
+- **Orders** — view and manage customer orders
+- **Users** — manage customer accounts
 
 ---
 
 ## Project Structure
 ```
 jambulani/
-├── backend/    ← Django REST Framework API
-├── frontend/   ← Nuxt 4 frontend
-└── README.md   ← You are here
-```
-
----
-
-## Prerequisites — Install These Once
-
-| Tool | Version | Install |
-|------|---------|---------|
-| Docker Desktop | Latest | [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop) |
-| Node.js | 20+ | [nodejs.org](https://nodejs.org) (LTS) |
-| Python | 3.11–3.13 | [python.org](https://www.python.org/downloads) |
-| uv | Latest | See below |
-
-**Install uv (Python package manager):**
-
-Windows (PowerShell):
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-macOS / Linux:
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Restart your terminal after installing. Verify: `uv --version`
-
-> **Why uv?** Plain `pip install` fails on certain Python versions because it tries to compile
-> packages like Pillow and psycopg2 from source, which requires a C compiler. uv always
-> downloads pre-built binaries — no compiler, no errors, works on any OS.
-
----
-
-## Option A — Full Docker (Recommended)
-
-Everything runs in containers. Zero configuration required.
-
-### 1. Backend
-```bash
-cd jambulani/backend
-cp .env.example .env
-docker compose up --build
-```
-
-First run takes 3–5 minutes. Wait until you see:
-```
-backend  | Starting gunicorn...
-```
-
-| Service | URL |
-|---------|-----|
-| API | http://localhost:8000/api/v1/ |
-| Admin panel | http://localhost:8000/admin |
-
-Admin login: `admin@jambulani.com` / `admin123`
-
-### 2. Frontend
-
-Open a new terminal:
-```bash
-cd jambulani/frontend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Open: http://localhost:3000
-
-### Stop everything
-```bash
-# In the backend terminal:
-Ctrl+C
-docker compose down
-```
-
----
-
-## Option B — Local Development
-
-The database runs in Docker. Django and Nuxt run directly on your machine.
-Better for development — you get full error output and hot reload.
-
-### Backend
-```bash
-cd jambulani/backend
-
-# Copy environment file — no edits needed, credentials match the db container
-cp .env.example .env
-
-# Start PostgreSQL only (Docker)
-docker compose -f docker-compose.db.yml up -d
-
-# Install Python dependencies
-uv sync
-
-# Activate the virtual environment
-# Windows:
-.venv\Scripts\Activate.ps1
-# macOS/Linux:
-source .venv/bin/activate
-
-# Run migrations and seed demo data
-python manage.py migrate
-python manage.py seed_data
-
-# Start the backend
-python manage.py runserver
-```
-
-Verify: http://localhost:8000/api/v1/products/ should return product JSON.
-Admin: http://localhost:8000/admin → `admin@jambulani.com` / `admin123`
-
-### Frontend
-
-Open a new terminal:
-```bash
-cd jambulani/frontend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-Open: http://localhost:3000
-
-### Stop everything
-```bash
-# Backend terminal: Ctrl+C
-# Frontend terminal: Ctrl+C
-
-# Stop the database container:
-cd jambulani/backend
-docker compose -f docker-compose.db.yml down
-```
-
----
-
-## Testing the Application
-
-Test in this order after getting everything running:
-
-**1. Products load**
-Open http://localhost:3000 — the home page should show featured products and league cards.
-This confirms the frontend is successfully talking to the backend.
-
-**2. Browse and filter**
-Go to http://localhost:3000/products — try searching, filtering by league, and changing price range.
-
-**3. Product detail**
-Click any product — check the image gallery, size selector, name/number customization fields.
-
-**4. Cart**
-Select a size and click Add to Cart. The cart drawer should slide in from the right.
-Try changing quantity and removing the item.
-
-**5. Register**
-Go to http://localhost:3000/register and create an account.
-You should be redirected home with your name visible in the header.
-
-**6. Login / Logout**
-Click your name → Sign Out. Then go to http://localhost:3000/login and sign back in.
-
-**7. Account page**
-Go to http://localhost:3000/account — update your name and shipping address.
-Try the Change Password tab.
-
-**8. Protected route**
-Sign out, then go directly to http://localhost:3000/account.
-You should be automatically redirected to /login.
-
-**9. Admin panel**
-Open http://localhost:8000/admin, log in with `admin@jambulani.com` / `admin123`.
-Go to Products → Add Product, fill in the details, save.
-Refresh http://localhost:3000/products — your product should appear.
-
-**10. API directly**
-These should all return JSON in your browser or Postman:
-```
-GET http://localhost:8000/api/v1/products/
-GET http://localhost:8000/api/v1/leagues/
-GET http://localhost:8000/api/v1/products/featured/
+├── backend/
+│   ├── accounts/          # User auth (register, login, JWT, profile)
+│   ├── store/             # Products, cart, orders, leagues, collections
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── admin.py
+│   │   └── management/commands/seed_data.py
+│   ├── config/            # Django settings, root URL conf
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── docker-compose.db.yml   ← DB only (for local dev)
+│
+└── frontend/
+    ├── app/
+    │   ├── assets/css/    # Tailwind + global styles
+    │   ├── components/
+    │   │   ├── layout/    # AppHeader.vue, AppFooter.vue
+    │   │   ├── cart/      # CartDrawer.vue
+    │   │   └── product/   # ProductCard.vue
+    │   ├── composables/   # useApi.ts, useClientStore.ts
+    │   ├── layouts/       # default.vue (header + footer + rewards tab)
+    │   ├── pages/         # index.vue, products/[slug].vue, login, register...
+    │   ├── plugins/       # auth.client.ts
+    │   ├── stores/        # auth.ts, cart.ts (Pinia)
+    │   └── types/         # TypeScript interfaces
+    ├── public/
+    │   └── assets/images/ # Static images (see above)
+    ├── nuxt.config.ts
+    ├── tailwind.config.ts
+    └── package.json
 ```
 
 ---
 
 ## Troubleshooting
 
-**PowerShell blocks `.venv\Scripts\Activate.ps1`:**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-Then retry the activation command.
+**`django.db.OperationalError: could not connect to server`**  
+→ Make sure the DB container is running: `docker compose -f docker-compose.db.yml up -d`
 
-**`uv sync` says "No interpreter found for Python 3.11":**
-```powershell
-# Confirm Python 3.11 is installed
-py -3.11 --version
+**`Module not found` errors in frontend**  
+→ Run `npm install` inside the `frontend/` directory
 
-# Point uv to it explicitly
-uv sync --python "py -3.11"
-```
+**Images not loading**  
+→ Check that `NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000` is set in `frontend/.env`  
+→ For static images (leagues/collections), verify filenames match exactly (lowercase, hyphens)
 
-**`python manage.py migrate` fails with "connection refused":**
-The database container is not running. Fix:
+**Admin login doesn't work**  
+→ Make sure you ran `python manage.py createsuperuser`
+
+**Cart / auth not working after refresh**  
+→ Ensure both frontend and backend are running simultaneously
+
+---
+
+## Running Tests
 ```bash
-docker compose -f docker-compose.db.yml up -d
-# Wait 5 seconds, then retry
-python manage.py migrate
+# Backend tests
+cd backend
+python manage.py test
+
+# Frontend type check
+cd frontend
+npm run typecheck
 ```
 
-**Port 8000 already in use:**
-```powershell
-# Windows
-netstat -ano | findstr :8000
-taskkill /PID  /F
-
-# macOS/Linux
-lsof -ti:8000 | xargs kill
-```
-
-**Port 5432 already in use:**
-You have PostgreSQL installed natively on your machine. The Docker database container
-can't start because something is already using that port.
-Either stop your local PostgreSQL service, or change `POSTGRES_PORT=5433` in `.env`
-and in `docker-compose.db.yml`.
-
-**Frontend shows blank page or API errors:**
-Check that `frontend/.env` exists and contains:
-```
-NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
-NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000
-```
-
-**Everything was working, broke after restarting the computer:**
-Docker Desktop needs to be open and running before starting containers.
-Open it from the Start menu, wait for the whale icon in the taskbar, then rerun your commands.
-
-**Wipe everything and start fresh:**
-```bash
-cd jambulani/backend
-docker compose down -v
-docker compose up --build
-```
-`-v` removes the database volume so migrations and seed data run 
+---
