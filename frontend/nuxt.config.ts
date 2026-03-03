@@ -9,6 +9,15 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  // Disable folder-prefix in component names so <AppHeader>, <AppFooter>,
+  // <CartDrawer>, <ProductCard> all resolve correctly regardless of sub-folder
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
