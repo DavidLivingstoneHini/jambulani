@@ -21,11 +21,6 @@ staticfiles/
 media/
 db.sqlite3
 
-# uv lock (generated on first uv sync — not faking it)
-# uv.lock is intentionally NOT committed since we can't generate it with correct hashes here.
-# It will be auto-generated on: uv sync
-# In a real project, you WOULD commit uv.lock for reproducibility.
-
 # IDE
 .vscode/
 .idea/

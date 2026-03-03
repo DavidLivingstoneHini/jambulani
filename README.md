@@ -1,165 +1,146 @@
 # Jambulani — Customized Football Jerseys
 
-Full-stack e-commerce app: **Nuxt 4** frontend + **Django REST Framework** backend.  
-Custom jersey ordering with name, number, patch personalisation.
+Full-stack e-commerce application for customized football jerseys.
+Built with **Nuxt 4** (Vue 3 + TypeScript) on the frontend and **Django REST Framework** on the backend.
 
 ---
 
 ## Tech Stack
 
-| Layer     | Technology |
-|-----------|-----------|
-| Frontend  | Nuxt 4 (Vue 3 + TypeScript), Tailwind CSS, Pinia |
-| Backend   | Django 4.2, Django REST Framework, PostgreSQL |
-| Auth      | JWT (djangorestframework-simplejwt) |
-| Dev infra | Docker Compose |
+| Layer    | Technology                                      |
+|----------|-------------------------------------------------|
+| Frontend | Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia  |
+| Backend  | Django 4.2, Django REST Framework, PostgreSQL   |
+| Auth     | Custom JWT with HttpOnly cookies + token rotation |
+| Infra    | Docker + Docker Compose                         |
+
+> **Why Python 3.11?** Some dependencies (notably Pillow) do not yet provide pre-built wheels for Python 3.13/3.14, which means they require compiling from source and additional system dependencies. Python 3.11 was chosen for full ecosystem compatibility and stability across all platforms.
 
 ---
 
 ## Prerequisites
 
-Install these before starting:
+You only need two things installed:
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose)
-- [Node.js 20+](https://nodejs.org/) and npm
-- [Python 3.11+](https://www.python.org/) (only needed for local backend dev; Docker handles prod)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — runs the entire backend automatically
+- [Node.js 20+](https://nodejs.org/) — runs the frontend dev server
 
 ---
 
-## Quickstart (Recommended — Docker for DB, local for app servers)
+## Getting Started
 
-### 1. Clone the repo
+### 1. Clone the repository
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/jambulani.git
+git clone https://github.com/DavidLivingstoneHini/jambulani.git
 cd jambulani
 ```
 
-### 2. Start PostgreSQL via Docker
-```bash
-cd backend
-docker compose -f docker-compose.db.yml up -d
-```
-
-This starts a Postgres container on port **5432** with:
-- Database: `jambulani`
-- User: `jambulani`
-- Password: `jambulani`
-
-### 3. Set up the backend
-```bash
-cd backend
-
-# Copy environment file
-cp .env.example .env
-
-# Create a Python virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run database migrations
-python manage.py migrate
-
-# Seed the database with sample products, leagues, collections, patches
-python manage.py seed_data
-
-# Create an admin superuser (follow the prompts)
-python manage.py createsuperuser
-
-# Start the backend server
-python manage.py runserver
-```
-
-Backend runs at: **http://localhost:8000**  
-Django admin: **http://localhost:8000/admin**
-
-### 4. Set up the frontend
-
-Open a **new terminal tab**:
-```bash
-cd frontend
-
-# Copy environment file
-cp .env.example .env
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
-
-Frontend runs at: **http://localhost:3000**
-
 ---
 
-## Full Docker Setup (optional — runs everything in containers)
+### 2. Start the backend with Docker
 
-If you prefer to run everything in Docker:
+The backend container handles everything automatically on first boot:
+migrations, static files, and demo data (including the admin account).
+
 ```bash
-# From the repo root
+cd backend
+cp .env.example .env
 docker compose up --build
 ```
 
-Services:
-- **db** — PostgreSQL on port 5432
-- **backend** — Django on port 8000
-- **frontend** — Nuxt on port 3000
+That's it. Wait for this line in the logs:
 
-Then seed data in the running backend container:
+```
+PostgreSQL ready.
+seeding complete.
+```
+
+The backend is now running at **http://localhost:8000**
+
+> **Note:** The first build takes ~60 seconds to pull images and install dependencies.
+> Subsequent starts are instant.
+
+---
+
+### 3. Start the frontend
+
+Open a **new terminal tab** and run:
+
 ```bash
-docker compose exec backend python manage.py seed_data
-docker compose exec backend python manage.py createsuperuser
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The frontend is now running at **http://localhost:3000**
+
+---
+
+## Login Credentials
+
+### Django Admin
+
+URL: **http://localhost:8000/admin**
+
+| Field    | Value                  |
+|----------|------------------------|
+| Email    | `admin@jambulani.com`  |
+| Password | `admin123`             |
+
+### Customer Account (for testing the storefront)
+
+Register a new account at **http://localhost:3000/register**, or use the API directly:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "reviewer@test.com",
+    "first_name": "Test",
+    "last_name": "Reviewer",
+    "password": "StrongPass123!",
+    "password_confirm": "StrongPass123!"
+  }'
 ```
 
 ---
 
-## Environment Variables
+## What Gets Created Automatically
 
-### Backend (`backend/.env`)
-```env
-SECRET_KEY=your-secret-key-change-in-production
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+When Docker starts for the first time, `seed_data` populates the database with:
 
-DB_NAME=jambulani
-DB_USER=jambulani
-DB_PASSWORD=jambulani
-DB_HOST=localhost        # use "db" if running inside Docker Compose
-DB_PORT=5432
-
-CORS_ALLOWED_ORIGINS=http://localhost:3000
-MEDIA_URL=/media/
-```
-
-### Frontend (`frontend/.env`)
-```env
-NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
-NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000
-```
+- **16 products** (8 featured on homepage) with full details
+- **5 leagues** — Champions League, Europa League, Copa America, Asian Cup, African Nations Cup
+- **6 collections** — Kids, Large Sizes, Goalkeeper, Authentic/Pro Player, Shorts, Socks
+- **3 patches** — Champions League badge, Europa League badge, No Patch
+- **1 size chart**
+- **Admin superuser** — `admin@jambulani.com` / `admin123`
 
 ---
 
-## Static Images (Leagues, Collections, Hero)
+## Adding Images
 
-The homepage uses static images you place in:
+The homepage sections use static images you place in the frontend folder.
+The app works without them (coloured fallback backgrounds show instead),
+but adding them makes it look exactly like the design.
+
 ```
 frontend/public/assets/images/
-├── hero-banner.jpg               ← Hero section background
-├── personalization-bg.jpg        ← Personalization card background
-├── social-bg.jpg                 ← Social Networks card background
+├── hero-banner.jpg                   ← Hero section (1440 × 400px)
+├── personalization-bg.jpg            ← Personalization card (700 × 300px)
+├── social-bg.jpg                     ← Social Networks card (700 × 300px)
 │
 ├── leagues/
-│   ├── champions-league.jpg
+│   ├── champions-league.jpg          (400 × 400px)
 │   ├── europa-league.jpg
 │   ├── copa-america.jpg
 │   ├── asian-cup.jpg
 │   └── african-nations-cup.jpg
 │
 └── collections/
-    ├── kids.jpg
+    ├── kids.jpg                      (640 × 360px)
     ├── large-sizes.jpg
     ├── goalkeeper.jpg
     ├── authentic-pro-player.jpg
@@ -167,131 +148,181 @@ frontend/public/assets/images/
     └── socks.jpg
 ```
 
-Until images are added, coloured fallback backgrounds display automatically.
+Product images are managed through the Django Admin:
+**Admin → Store → Products → [select product] → Product Images → Upload**
 
 ---
 
-## Product Images (Dynamic / Seeded)
+## Stopping and Restarting
 
-Product images are managed through Django Admin:
+```bash
+# Stop everything
+docker compose down
 
-1. Go to **http://localhost:8000/admin**
-2. Log in with your superuser credentials
-3. Navigate to **Store → Products**
-4. Select a product → scroll to **Product Images** → upload images
+# Restart (data is preserved in Docker volumes)
+docker compose up
 
-Images are served from `/media/` by the Django dev server.
-
-The `seed_data` command creates 16 products (8 featured) with placeholder data — you can add real images through admin.
-
----
-
-## API Endpoints
-
-All endpoints are prefixed with `/api/v1/`.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/products/` | List all products (supports `?search=`, `?league=`, `?collection=`) |
-| `GET` | `/products/featured/` | Featured products for homepage |
-| `GET` | `/products/{slug}/` | Single product detail |
-| `GET` | `/leagues/` | All leagues |
-| `GET` | `/collections/` | All collections |
-| `GET` | `/cart/` | Get current cart |
-| `POST` | `/cart/items/` | Add item to cart |
-| `PATCH` | `/cart/items/{id}/` | Update cart item quantity |
-| `DELETE` | `/cart/items/{id}/` | Remove cart item |
-| `POST` | `/auth/register/` | Register new user |
-| `POST` | `/auth/login/` | Login (returns JWT tokens) |
-| `POST` | `/auth/logout/` | Logout |
-| `GET/PUT` | `/auth/profile/` | Get/update user profile |
+# Full reset — wipes the database and starts fresh
+docker compose down -v
+docker compose up --build
+```
 
 ---
 
-## Django Admin
+## Running the Tests
 
-The admin panel at **http://localhost:8000/admin** lets you manage:
+### Backend
 
-- **Products** — name, price, description, images, sizes, discount, featured flag
-- **Leagues** — name, slug, sort order
-- **Collections** — name, slug, sort order
-- **Patches** — name, extra price
-- **Size Charts** — name, image, description
-- **Orders** — view and manage customer orders
-- **Users** — manage customer accounts
+```bash
+cd backend
+cp .env.example .env
+
+# Start just the database
+docker compose -f docker-compose.db.yml up -d
+
+# Set up a local Python environment
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run all 50 tests
+python manage.py test store.tests accounts.tests --verbosity=2
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm test                   # run once
+npm run test:watch         # watch mode during development
+npm run test:coverage      # with coverage report
+```
 
 ---
 
 ## Project Structure
+
 ```
 jambulani/
 ├── backend/
-│   ├── accounts/          # User auth (register, login, JWT, profile)
-│   ├── store/             # Products, cart, orders, leagues, collections
-│   │   ├── models.py
+│   ├── accounts/               # Auth: register, login, JWT, profile
+│   │   ├── models.py           # Custom User + RefreshToken models
+│   │   ├── views.py            # Register, Login, Logout, Refresh, Me
 │   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── urls.py
+│   │   ├── authentication.py   # JWT cookie authentication backend
+│   │   ├── tokens.py           # JWT issue/verify helpers
 │   │   ├── admin.py
-│   │   └── management/commands/seed_data.py
-│   ├── config/            # Django settings, root URL conf
-│   ├── manage.py
-│   ├── requirements.txt
+│   │   └── tests/
+│   │       └── test_auth.py    # 23 auth tests
+│   ├── store/
+│   │   ├── models.py           # Product, League, Collection, Cart, etc.
+│   │   ├── views.py            # Product, Cart, Newsletter ViewSets
+│   │   ├── serializers.py
+│   │   ├── filters.py
+│   │   ├── admin.py            # Rich admin with image previews + badges
+│   │   ├── urls.py
+│   │   └── tests/
+│   │       ├── test_models.py  # Model unit tests
+│   │       └── test_api.py     # API integration tests
+│   ├── store/management/commands/
+│   │   └── seed_data.py        # Demo data + admin user
+│   ├── config/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
 │   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── docker-compose.db.yml   ← DB only (for local dev)
+│   ├── docker-compose.yml      # Backend + PostgreSQL (use this)
+│   ├── docker-compose.db.yml   # PostgreSQL only (for local dev)
+│   ├── entrypoint.sh           # Auto: migrate + collectstatic + seed
+│   ├── requirements.txt
+│   └── .env.example
 │
 └── frontend/
     ├── app/
-    │   ├── assets/css/    # Tailwind + global styles
+    │   ├── assets/css/         # Tailwind + global styles
     │   ├── components/
-    │   │   ├── layout/    # AppHeader.vue, AppFooter.vue
-    │   │   ├── cart/      # CartDrawer.vue
-    │   │   └── product/   # ProductCard.vue
-    │   ├── composables/   # useApi.ts, useClientStore.ts
-    │   ├── layouts/       # default.vue (header + footer + rewards tab)
-    │   ├── pages/         # index.vue, products/[slug].vue, login, register...
-    │   ├── plugins/       # auth.client.ts
-    │   ├── stores/        # auth.ts, cart.ts (Pinia)
-    │   └── types/         # TypeScript interfaces
-    ├── public/
-    │   └── assets/images/ # Static images (see above)
+    │   │   ├── layout/         # AppHeader.vue, AppFooter.vue
+    │   │   ├── cart/           # CartDrawer.vue
+    │   │   └── product/        # ProductCard.vue
+    │   ├── composables/        # useApi.ts, useClientStore.ts
+    │   ├── layouts/            # default.vue (header + footer + rewards tab)
+    │   ├── pages/              # index.vue, products/[slug].vue, account/
+    │   ├── stores/             # auth.ts, cart.ts (Pinia)
+    │   └── types/              # TypeScript interfaces
+    ├── public/assets/images/   # Static images (leagues, collections, hero)
+    ├── tests/
+    │   ├── setup.ts
+    │   ├── stores/             # cart.test.ts, auth.test.ts
+    │   └── components/         # ProductCard.test.ts
     ├── nuxt.config.ts
+    ├── vitest.config.ts
     ├── tailwind.config.ts
     └── package.json
 ```
 
 ---
 
+## API Reference
+
+All endpoints are prefixed `/api/v1/`.
+
+| Method            | Endpoint                        | Description                        |
+|-------------------|---------------------------------|------------------------------------|
+| `GET`             | `/products/`                    | List products (`?search=`, `?league=`, `?collection=`) |
+| `GET`             | `/products/featured/`           | Featured products for homepage     |
+| `GET`             | `/products/{slug}/`             | Product detail                     |
+| `GET`             | `/leagues/`                     | All active leagues                 |
+| `GET`             | `/collections/`                 | All active collections             |
+| `GET`             | `/cart/`                        | View current cart                  |
+| `POST`            | `/cart/items/`                  | Add item to cart                   |
+| `PATCH`           | `/cart/items/{id}/`             | Update cart item quantity          |
+| `DELETE`          | `/cart/items/{id}/`             | Remove cart item                   |
+| `DELETE`          | `/cart/clear/`                  | Empty the cart                     |
+| `POST`            | `/auth/register/`               | Create account                     |
+| `POST`            | `/auth/login/`                  | Login (sets HttpOnly cookies)      |
+| `POST`            | `/auth/logout/`                 | Logout (clears cookies)            |
+| `POST`            | `/auth/refresh/`                | Rotate refresh token               |
+| `GET` / `PATCH`   | `/auth/me/`                     | Get / update profile               |
+| `POST`            | `/auth/change-password/`        | Change password                    |
+| `POST`            | `/newsletter/subscribe/`        | Newsletter signup                  |
+
+---
+
 ## Troubleshooting
 
-**`django.db.OperationalError: could not connect to server`**  
-→ Make sure the DB container is running: `docker compose -f docker-compose.db.yml up -d`
-
-**`Module not found` errors in frontend**  
-→ Run `npm install` inside the `frontend/` directory
-
-**Images not loading**  
-→ Check that `NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000` is set in `frontend/.env`  
-→ For static images (leagues/collections), verify filenames match exactly (lowercase, hyphens)
-
-**Admin login doesn't work**  
-→ Make sure you ran `python manage.py createsuperuser`
-
-**Cart / auth not working after refresh**  
-→ Ensure both frontend and backend are running simultaneously
-
----
-
-## Running Tests
+**Docker won't start — port 8000 already in use**
 ```bash
-# Backend tests
-cd backend
-python manage.py test
-
-# Frontend type check
-cd frontend
-npm run typecheck
+# Find and kill whatever is using port 8000
+# macOS / Linux:
+lsof -ti:8000 | xargs kill -9
+# Windows (PowerShell):
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
 ```
 
----
+**Admin page looks unstyled (plain HTML)**
+```bash
+# Re-collect static files inside the running container
+docker compose exec backend python manage.py collectstatic --noinput
+docker compose restart backend
+```
+
+**Frontend can't reach the backend (network error)**
+Make sure `frontend/.env` contains:
+```
+NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
+NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000
+```
+
+**Database is empty / seed data missing**
+```bash
+# Re-run seed manually inside the running container
+docker compose exec backend python manage.py seed_data
+```
+
+**Want a completely fresh start**
+```bash
+docker compose down -v   # -v removes volumes (wipes database)
+docker compose up --build
+```

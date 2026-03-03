@@ -1,22 +1,15 @@
-# ── Full stack: backend + database ────────────────────────────────
-# Usage: docker compose up --build
-#
-# All secrets are read from a .env file.
-# Copy .env.example to .env before running:
-#   cp .env.example .env
-
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -29,7 +22,6 @@ services:
     env_file:
       - .env
     environment:
-      # Override HOST — inside Docker the db is reachable by service name, not localhost
       POSTGRES_HOST: db
     depends_on:
       db:

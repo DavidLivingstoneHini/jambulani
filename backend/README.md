@@ -1,231 +1,328 @@
-# Jambulani — Backend API
+# Jambulani — Customized Football Jerseys
 
-Django REST Framework · PostgreSQL · JWT Authentication
-
----
-
-## How to Run
-
-There are two ways. Pick one.
+Full-stack e-commerce application for customized football jerseys.
+Built with **Nuxt 4** (Vue 3 + TypeScript) on the frontend and **Django REST Framework** on the backend.
 
 ---
 
-### Option 1 — Docker (Recommended)
+## Tech Stack
 
-**One command. Zero setup. Works on Windows, macOS, Linux.**
+| Layer    | Technology                                      |
+|----------|-------------------------------------------------|
+| Frontend | Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia  |
+| Backend  | Django 4.2, Django REST Framework, PostgreSQL   |
+| Auth     | Custom JWT with HttpOnly cookies + token rotation |
+| Infra    | Docker + Docker Compose                         |
 
-> Requires: [Docker Desktop](https://www.docker.com/products/docker-desktop/) (free)
+> **Why Python 3.11?** Some dependencies (notably Pillow) do not yet provide pre-built wheels for Python 3.13/3.14, which means they require compiling from source and additional system dependencies. Python 3.11 was chosen for full ecosystem compatibility and stability across all platforms.
+
+---
+
+## Prerequisites
+
+You only need two things installed:
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — runs the entire backend automatically
+- [Node.js 20+](https://nodejs.org/) — runs the frontend dev server
+
+---
+
+## Getting Started
+
+### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
-cd jambulani/backend
+git clone https://github.com/DavidLivingstoneHini/jambulani.git
+cd jambulani
+```
+
+---
+
+### 2. Start the backend with Docker
+
+The backend container handles everything automatically on first boot:
+migrations, static files, and demo data (including the admin account).
+
+```bash
+cd backend
+cp .env.example .env
 docker compose up --build
 ```
 
-That's it. Docker handles Python, PostgreSQL, migrations, and seed data automatically.
+That's it. Wait for this line in the logs:
 
-| Service  | URL                           |
-|----------|-------------------------------|
-| API      | http://localhost:8000/api/v1/ |
-| Admin    | http://localhost:8000/admin   |
+```
+PostgreSQL ready.
+seeding complete.
+```
 
-**Admin login:** `admin@jambulani.com` / `admin123`
+The backend is now running at **http://localhost:8000**
 
-To stop: `docker compose down`
+> **Note:** The first build takes ~60 seconds to pull images and install dependencies.
+> Subsequent starts are instant.
 
 ---
 
-### Option 2 — Local Development
+### 3. Start the frontend
 
-Runs Django directly on your machine. Still uses PostgreSQL, but only the database runs in Docker.
-
-**Requirements:**
-- Docker Desktop (for the database container)
-- Python 3.11, 3.12, or 3.13
-- `uv` — a modern Python package manager (replaces pip entirely)
-
-#### Step 1 — Install uv
-
-`uv` fetches pre-built binary packages. It never compiles from source, so there are no C compiler errors, no Visual C++ requirements, no zlib errors — on any OS, any Python version.
-
-**Windows (PowerShell):**
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-**macOS / Linux:**
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Close and reopen your terminal. Verify: `uv --version`
-
-#### Step 2 — Clone and set up
+Open a **new terminal tab** and run:
 
 ```bash
-git clone <repo-url>
-cd jambulani/backend
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
 
-# Copy environment config
+The frontend is now running at **http://localhost:3000**
+
+---
+
+## Login Credentials
+
+### Django Admin
+
+URL: **http://localhost:8000/admin**
+
+| Field    | Value                  |
+|----------|------------------------|
+| Email    | `admin@jambulani.com`  |
+| Password | `admin123`             |
+
+### Customer Account (for testing the storefront)
+
+Register a new account at **http://localhost:3000/register**, or use the API directly:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "reviewer@test.com",
+    "first_name": "Test",
+    "last_name": "Reviewer",
+    "password": "StrongPass123!",
+    "password_confirm": "StrongPass123!"
+  }'
+```
+
+---
+
+## What Gets Created Automatically
+
+When Docker starts for the first time, `seed_data` populates the database with:
+
+- **16 products** (8 featured on homepage) with full details
+- **5 leagues** — Champions League, Europa League, Copa America, Asian Cup, African Nations Cup
+- **6 collections** — Kids, Large Sizes, Goalkeeper, Authentic/Pro Player, Shorts, Socks
+- **3 patches** — Champions League badge, Europa League badge, No Patch
+- **1 size chart**
+- **Admin superuser** — `admin@jambulani.com` / `admin123`
+
+---
+
+## Adding Images
+
+The homepage sections use static images you place in the frontend folder.
+The app works without them (coloured fallback backgrounds show instead),
+but adding them makes it look exactly like the design.
+
+```
+frontend/public/assets/images/
+├── hero-banner.jpg                   ← Hero section (1440 × 400px)
+├── personalization-bg.jpg            ← Personalization card (700 × 300px)
+├── social-bg.jpg                     ← Social Networks card (700 × 300px)
+│
+├── leagues/
+│   ├── champions-league.jpg          (400 × 400px)
+│   ├── europa-league.jpg
+│   ├── copa-america.jpg
+│   ├── asian-cup.jpg
+│   └── african-nations-cup.jpg
+│
+└── collections/
+    ├── kids.jpg                      (640 × 360px)
+    ├── large-sizes.jpg
+    ├── goalkeeper.jpg
+    ├── authentic-pro-player.jpg
+    ├── shorts.jpg
+    └── socks.jpg
+```
+
+Product images are managed through the Django Admin:
+**Admin → Store → Products → [select product] → Product Images → Upload**
+
+---
+
+## Stopping and Restarting
+
+```bash
+# Stop everything
+docker compose down
+
+# Restart (data is preserved in Docker volumes)
+docker compose up
+
+# Full reset — wipes the database and starts fresh
+docker compose down -v
+docker compose up --build
+```
+
+---
+
+## Running the Tests
+
+### Backend
+
+```bash
+cd backend
 cp .env.example .env
 
-# Install all Python dependencies
-uv sync
-```
-
-`uv sync` reads `pyproject.toml` and `uv.lock`, downloads pre-built wheels, and creates a `.venv` automatically. No activation needed — `uv run` handles it.
-
-#### Step 3 — Start PostgreSQL (Docker, database only)
-
-```bash
+# Start just the database
 docker compose -f docker-compose.db.yml up -d
+
+# Set up a local Python environment
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run all 50 tests
+python manage.py test store.tests accounts.tests --verbosity=2
 ```
 
-This starts only PostgreSQL on port 5432. Your Django process runs locally.
-
-#### Step 4 — Migrate, seed, run
+### Frontend
 
 ```bash
-uv run python manage.py migrate
-uv run python manage.py seed_data
-uv run python manage.py runserver
+cd frontend
+npm install
+npm test                   # run once
+npm run test:watch         # watch mode during development
+npm run test:coverage      # with coverage report
 ```
-
-Or with the Makefile shortcut:
-```bash
-make dev   # does db + migrate + seed + runserver in one command
-```
-
-API running at: http://localhost:8000/api/v1/
-Admin: http://localhost:8000/admin → `admin@jambulani.com` / `admin123`
-
----
-
-## Why uv instead of pip?
-
-This is the core fix for the wheel compilation errors reviewers hit with plain pip:
-
-| Problem with `pip install` | How `uv` solves it |
-|---|---|
-| `psycopg2-binary` fails on Python 3.14 — no pre-built wheel | `uv` resolves a compatible version automatically |
-| Pillow fails — "zlib not found", requires C compiler | `uv` always downloads a pre-built binary wheel |
-| "Microsoft Visual C++ 14.0 required" on Windows | `uv` never compiles from source |
-| Different behavior per machine (Python version, pip version) | `uv.lock` guarantees bit-for-bit identical installs everywhere |
-| Slow (Pillow is 46MB to compile) | `uv` is 10–100× faster than pip |
-
-The wheel errors you saw happen because `psycopg2-binary==2.9.9` and `Pillow==10.4.0` do not have pre-built binaries for Python 3.14. `uv` resolves `>=` ranges to a version that has a binary wheel for whatever Python you're running.
 
 ---
 
 ## Project Structure
 
 ```
-backend/
-├── pyproject.toml          ← All dependencies declared here
-├── uv.lock                 ← Exact locked versions (committed to git)
-├── .python-version         ← Tells uv which Python version to use (3.11)
-├── .env.example            ← Copy to .env for local dev
-├── docker-compose.yml      ← Full stack (backend + db)
-├── docker-compose.db.yml   ← DB only (for local dev)
-├── Makefile                ← Developer shortcuts
-├── Dockerfile
-├── entrypoint.sh
-├── manage.py
-├── config/
-│   ├── settings.py         ← Single settings file, reads from .env
-│   └── urls.py
-├── accounts/               ← Auth app
-│   ├── models.py           ← Custom User + RefreshToken
-│   ├── authentication.py   ← JWT DRF authenticator
-│   ├── tokens.py           ← JWT issue/decode
-│   ├── serializers.py
-│   ├── views.py
-│   └── urls.py
-└── store/                  ← Product catalog app
-    ├── models.py
-    ├── serializers.py
-    ├── views.py
-    ├── admin.py
-    ├── filters.py
-    └── management/commands/seed_data.py
+jambulani/
+├── backend/
+│   ├── accounts/               # Auth: register, login, JWT, profile
+│   │   ├── models.py           # Custom User + RefreshToken models
+│   │   ├── views.py            # Register, Login, Logout, Refresh, Me
+│   │   ├── serializers.py
+│   │   ├── authentication.py   # JWT cookie authentication backend
+│   │   ├── tokens.py           # JWT issue/verify helpers
+│   │   ├── admin.py
+│   │   └── tests/
+│   │       └── test_auth.py    # 23 auth tests
+│   ├── store/
+│   │   ├── models.py           # Product, League, Collection, Cart, etc.
+│   │   ├── views.py            # Product, Cart, Newsletter ViewSets
+│   │   ├── serializers.py
+│   │   ├── filters.py
+│   │   ├── admin.py            # Rich admin with image previews + badges
+│   │   ├── urls.py
+│   │   └── tests/
+│   │       ├── test_models.py  # Model unit tests
+│   │       └── test_api.py     # API integration tests
+│   ├── store/management/commands/
+│   │   └── seed_data.py        # Demo data + admin user
+│   ├── config/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── Dockerfile
+│   ├── docker-compose.yml      # Backend + PostgreSQL (use this)
+│   ├── docker-compose.db.yml   # PostgreSQL only (for local dev)
+│   ├── entrypoint.sh           # Auto: migrate + collectstatic + seed
+│   ├── requirements.txt
+│   └── .env.example
+│
+└── frontend/
+    ├── app/
+    │   ├── assets/css/         # Tailwind + global styles
+    │   ├── components/
+    │   │   ├── layout/         # AppHeader.vue, AppFooter.vue
+    │   │   ├── cart/           # CartDrawer.vue
+    │   │   └── product/        # ProductCard.vue
+    │   ├── composables/        # useApi.ts, useClientStore.ts
+    │   ├── layouts/            # default.vue (header + footer + rewards tab)
+    │   ├── pages/              # index.vue, products/[slug].vue, account/
+    │   ├── stores/             # auth.ts, cart.ts (Pinia)
+    │   └── types/              # TypeScript interfaces
+    ├── public/assets/images/   # Static images (leagues, collections, hero)
+    ├── tests/
+    │   ├── setup.ts
+    │   ├── stores/             # cart.test.ts, auth.test.ts
+    │   └── components/         # ProductCard.test.ts
+    ├── nuxt.config.ts
+    ├── vitest.config.ts
+    ├── tailwind.config.ts
+    └── package.json
 ```
 
 ---
 
 ## API Reference
 
-### Auth — `/api/v1/auth/`
+All endpoints are prefixed `/api/v1/`.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register/` | Create account |
-| POST | `/auth/login/` | Login → sets HttpOnly JWT cookies |
-| POST | `/auth/logout/` | Logout + revoke refresh token |
-| POST | `/auth/token/refresh/` | Silent token refresh (uses cookie) |
-| GET | `/auth/session/` | Check current session |
-| GET/PATCH | `/auth/me/` | Get / update profile |
-| POST | `/auth/password/change/` | Change password, revoke all sessions |
-
-### Store — `/api/v1/`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/products/` | List products (filterable, paginated) |
-| GET | `/products/{slug}/` | Product detail |
-| GET | `/products/featured/` | Featured products |
-| GET | `/leagues/` | All leagues |
-| GET | `/collections/` | All collections |
-| GET | `/patches/` | All patches |
-| GET/POST | `/cart/` | Session cart |
-| PATCH/DELETE | `/cart/{id}/` | Update/remove item |
-| DELETE | `/cart/clear/` | Clear cart |
-| POST | `/newsletter/subscribe/` | Newsletter signup |
-
-**Filtering:**
-```
-GET /api/v1/products/?league=premier-league&min_price=20&max_price=80&search=arsenal&ordering=-price&page=2
-```
-
----
-
-## Authentication Architecture
-
-Two-token system, zero secrets in localStorage:
-
-| Token | Type | TTL | Storage |
-|-------|------|-----|---------|
-| Access token | Signed JWT (HS256) | 15 minutes | JS memory only |
-| Refresh token | Opaque SHA-256 hash | 30 days | HttpOnly cookie |
-
-**Security features:**
-- Refresh token rotation on every `/token/refresh/` call
-- Token reuse detection — replay of a rotated token revokes the entire family
-- Password change revokes all active refresh token families
-- Auth endpoints rate-limited to 10 req/min (brute-force protection)
-- `Secure`, `HttpOnly`, `SameSite=Lax` cookie flags
-- Constant-time login (prevents user enumeration)
+| Method            | Endpoint                        | Description                        |
+|-------------------|---------------------------------|------------------------------------|
+| `GET`             | `/products/`                    | List products (`?search=`, `?league=`, `?collection=`) |
+| `GET`             | `/products/featured/`           | Featured products for homepage     |
+| `GET`             | `/products/{slug}/`             | Product detail                     |
+| `GET`             | `/leagues/`                     | All active leagues                 |
+| `GET`             | `/collections/`                 | All active collections             |
+| `GET`             | `/cart/`                        | View current cart                  |
+| `POST`            | `/cart/items/`                  | Add item to cart                   |
+| `PATCH`           | `/cart/items/{id}/`             | Update cart item quantity          |
+| `DELETE`          | `/cart/items/{id}/`             | Remove cart item                   |
+| `DELETE`          | `/cart/clear/`                  | Empty the cart                     |
+| `POST`            | `/auth/register/`               | Create account                     |
+| `POST`            | `/auth/login/`                  | Login (sets HttpOnly cookies)      |
+| `POST`            | `/auth/logout/`                 | Logout (clears cookies)            |
+| `POST`            | `/auth/refresh/`                | Rotate refresh token               |
+| `GET` / `PATCH`   | `/auth/me/`                     | Get / update profile               |
+| `POST`            | `/auth/change-password/`        | Change password                    |
+| `POST`            | `/newsletter/subscribe/`        | Newsletter signup                  |
 
 ---
 
 ## Troubleshooting
 
-**Port 5432 already in use:**
-Something else is using PostgreSQL. Either stop it, or change the port in `docker-compose.db.yml` and `.env`.
-
-**Port 8000 already in use:**
+**Docker won't start — port 8000 already in use**
 ```bash
-# macOS/Linux:
-lsof -ti:8000 | xargs kill
-# Windows PowerShell:
+# Find and kill whatever is using port 8000
+# macOS / Linux:
+lsof -ti:8000 | xargs kill -9
+# Windows (PowerShell):
 netstat -ano | findstr :8000
-# then: taskkill /PID <pid> /F
+taskkill /PID <PID> /F
 ```
 
-**uv not found after install:**
-Restart your terminal. uv adds itself to PATH but the current session won't see it until you restart.
-
-**Docker containers fail to start:**
+**Admin page looks unstyled (plain HTML)**
 ```bash
-docker compose down -v
+# Re-collect static files inside the running container
+docker compose exec backend python manage.py collectstatic --noinput
+docker compose restart backend
+```
+
+**Frontend can't reach the backend (network error)**
+Make sure `frontend/.env` contains:
+```
+NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
+NUXT_PUBLIC_MEDIA_BASE=http://localhost:8000
+```
+
+**Database is empty / seed data missing**
+```bash
+# Re-run seed manually inside the running container
+docker compose exec backend python manage.py seed_data
+```
+
+**Want a completely fresh start**
+```bash
+docker compose down -v   # -v removes volumes (wipes database)
 docker compose up --build
 ```
