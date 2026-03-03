@@ -14,8 +14,6 @@ Built with **Nuxt 4** (Vue 3 + TypeScript) on the frontend and **Django REST Fra
 | Auth     | Custom JWT with HttpOnly cookies + token rotation |
 | Infra    | Docker + Docker Compose                         |
 
-> **Why Python 3.11?** Some dependencies (notably Pillow) do not yet provide pre-built wheels for Python 3.13/3.14, which means they require compiling from source and additional system dependencies. Python 3.11 was chosen for full ecosystem compatibility and stability across all platforms.
-
 ---
 
 ## Prerequisites
@@ -25,6 +23,11 @@ You only need two things installed:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — runs the entire backend automatically
 - [Node.js 20+](https://nodejs.org/) — runs the frontend dev server
 
+> No Python installation required — Python 3.11 runs inside Docker.
+
+> **Why Python 3.11?** Some dependencies (notably Pillow) do not yet provide pre-built wheels for Python 3.13/3.14, which means they require compiling from source and additional system dependencies. Python 3.11 was chosen for full ecosystem compatibility and stability across all platforms.
+
+
 ---
 
 ## Getting Started
@@ -32,7 +35,7 @@ You only need two things installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/jambulani.git
+git clone https://github.com/DavidLivingstoneHini/jambulani.git
 cd jambulani
 ```
 
