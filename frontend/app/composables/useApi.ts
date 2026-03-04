@@ -12,7 +12,7 @@ export function useApi() {
       ...((options?.headers as Record<string, string>) ?? {}),
     }
 
-    // Inject auth token on client only (token is never available server-side)
+    // Inject auth token on client only
     if (process.client) {
       try {
         const authStore = useAuthStore()
@@ -20,7 +20,6 @@ export function useApi() {
           headers['Authorization'] = `Bearer ${authStore.accessToken}`
         }
       } catch {
-        // Store might not be available in all contexts — safe to skip
       }
     }
 

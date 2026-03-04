@@ -41,7 +41,6 @@
 
       <!-- Main content -->
       <div class="md:col-span-3">
-        <!-- Profile tab -->
         <div v-if="activeTab === 'profile'">
           <h2 class="font-display font-bold uppercase text-lg tracking-wider mb-6">Personal Information</h2>
           <form class="space-y-4 max-w-lg" @submit.prevent="handleUpdateProfile">
