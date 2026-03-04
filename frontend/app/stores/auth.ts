@@ -114,9 +114,8 @@ export const useAuthStore = defineStore('auth', {
           method: 'POST',
           credentials: 'include',
         })
-      } catch {
-        // Silent fail
-      } finally {
+      } catch {} 
+      finally {
         this.user = null
         this.accessToken = null
         this.initialized = false

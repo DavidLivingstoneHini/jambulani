@@ -100,7 +100,7 @@ const errors = reactive<Record<string, string>>({})
 const serverError = ref('')
 const showPassword = ref(false)
 
-// Simple password strength: 1=weak, 4=strong
+// Simple password strength calculation
 const passwordStrength = computed(() => {
   const p = form.password
   if (!p) return 0
