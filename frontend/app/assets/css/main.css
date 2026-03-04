@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    font-family: "Barlow", sans-serif;
+    font-family: "Montserrat", sans-serif;
     scroll-behavior: smooth;
   }
   body {
@@ -40,7 +40,7 @@
 
   /* Price atoms */
   .price-current  { @apply font-display font-bold text-2xl text-gray-900; }
-  .price-original { @apply text-red-500 line-through text-base font-body; }
+  .price-original { @apply text-red-500 line-through text-base font-body; } /* This will now use Montserrat */
 
   /* Badge */
   .badge-save {
@@ -49,11 +49,11 @@
 
   /* Form elements */
   .form-input {
-    @apply w-full border border-gray-300 px-3 py-2.5 text-[13px] font-body
+    @apply w-full border border-gray-300 px-3 py-2.5 text-[13px] font-body /* This will now use Montserrat */
            focus:outline-none focus:border-gray-500 transition-colors duration-150;
   }
   .form-select {
-    @apply w-full border border-gray-300 px-3 py-2.5 text-[13px] font-body bg-white
+    @apply w-full border border-gray-300 px-3 py-2.5 text-[13px] font-body bg-white /* This will now use Montserrat */
            focus:outline-none focus:border-gray-500 appearance-none cursor-pointer
            transition-colors duration-150;
   }
@@ -61,12 +61,12 @@
   /* Nav links */
   .nav-link {
     @apply text-[13px] text-gray-700 hover:text-gray-900
-           transition-colors duration-150 font-body;
+           transition-colors duration-150 font-body; /* This will now use Montserrat */
   }
 
   /* Footer links */
   .footer-link {
-    @apply text-gray-500 text-[13px] font-body hover:text-gray-900
+    @apply text-gray-500 text-[13px] font-body hover:text-gray-900 /* This will now use Montserrat */
            transition-colors duration-150;
   }
 }

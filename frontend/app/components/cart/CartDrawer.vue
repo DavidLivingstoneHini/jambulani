@@ -91,7 +91,7 @@
         </div>
         <NuxtLink
           to="/checkout"
-          class="btn-primary w-full text-center block text-center"
+          class="btn-primary w-full block text-center"
           @click="cartStore.isOpen = false"
         >
           Proceed to Checkout

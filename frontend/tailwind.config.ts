@@ -28,7 +28,7 @@ export default {
       fontFamily: {
         display: ['"Barlow Condensed"', "sans-serif"],
         heading: ['"Bebas Neue"', "sans-serif"],
-        body: ["Barlow", "sans-serif"],
+        body: ["Montserrat", "sans-serif"],
       },
       screens: {
         xs: "480px",
