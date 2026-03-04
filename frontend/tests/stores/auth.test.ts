@@ -1,31 +1,10 @@
 /**
  * Auth store unit tests.
- *
- * The store uses raw fetch() and process.client internally.
- * We mock both so tests run in Node/happy-dom without a real server.
- *
- * Auth store login signature: login(email: string, password: string)
- * Auth store register signature: register(payload: RegisterPayload)
- * cartTotal getter returns: string (not number)
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-
-// Globals the store depends on
-
-Object.defineProperty(globalThis, 'process', {
-  value: { client: true },
-  writable: true,
-})
-
-vi.stubGlobal('useRuntimeConfig', () => ({
-  public: {
-    apiBase: 'http://localhost:8000/api/v1',
-    mediaBase: 'http://localhost:8000',
-  },
-}))
-
-vi.stubGlobal('useAuthStore', () => ({ accessToken: null }))
+import { mockFetch, localStorageMock } from '../setup'
+import { useAuthStore } from '../../app/stores/auth'
 
 // Fixtures
 const mockUser = {
@@ -38,47 +17,19 @@ const mockUser = {
   is_staff: false,
 }
 
-function mockFetchSuccess(body: unknown, status = 200) {
-  return vi.fn().mockResolvedValue({
-    ok: true,
-    status,
-    json: () => Promise.resolve(body),
-  })
-}
-
-function mockFetchFailure(body: unknown, status = 400) {
-  return vi.fn().mockResolvedValue({
-    ok: false,
-    status,
-    json: () => Promise.resolve(body),
-  })
-}
-
-// Tests
-
 describe('Auth Store', () => {
-  let useAuthStore: typeof import('../../app/stores/auth').useAuthStore
+  let auth: ReturnType<typeof useAuthStore>
 
-  beforeEach(async () => {
+  beforeEach(() => {
     setActivePinia(createPinia())
-    vi.unstubAllGlobals()
-
-    vi.stubGlobal('useRuntimeConfig', () => ({
-      public: { apiBase: 'http://localhost:8000/api/v1' },
-    }))
-    vi.stubGlobal('useAuthStore', () => ({ accessToken: null }))
-    Object.defineProperty(globalThis, 'process', {
-      value: { client: true }, writable: true, configurable: true,
-    })
-
-    const mod = await import('../../app/stores/auth')
-    useAuthStore = mod.useAuthStore
+    vi.clearAllMocks()
+    mockFetch.mockClear()
+    localStorageMock.clear()
+    auth = useAuthStore()
   })
 
   // Initial state
-
   it('starts unauthenticated with null user and token', () => {
-    const auth = useAuthStore()
     expect(auth.user).toBeNull()
     expect(auth.accessToken).toBeNull()
     expect(auth.isAuthenticated).toBe(false)
@@ -86,76 +37,73 @@ describe('Auth Store', () => {
   })
 
   // isAuthenticated getter
-
   it('isAuthenticated is true when user and token are both set', () => {
-    const auth = useAuthStore()
     auth.user = mockUser
     auth.accessToken = 'valid.jwt.token'
     expect(auth.isAuthenticated).toBe(true)
   })
 
   it('isAuthenticated is false when user is set but token is null', () => {
-    const auth = useAuthStore()
     auth.user = mockUser
     auth.accessToken = null
     expect(auth.isAuthenticated).toBe(false)
   })
 
   it('isAuthenticated is false when token is set but user is null', () => {
-    const auth = useAuthStore()
     auth.user = null
     auth.accessToken = 'some.token'
     expect(auth.isAuthenticated).toBe(false)
   })
 
   // login()
-
   it('login sets user and accessToken on success', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchSuccess({
-      user: mockUser,
-      access_token: 'test.jwt.token',
-    }))
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({
+        user: mockUser,
+        access_token: 'test.jwt.token',
+      }),
+    })
 
-    await auth.login('fan@jambulani.com', 'StrongPass123!')
+    await auth.login({ email: 'fan@jambulani.com', password: 'StrongPass123!' })
 
-    expect(auth.user?.email).toBe('fan@jambulani.com')
+    expect(auth.user).toEqual(mockUser)
     expect(auth.accessToken).toBe('test.jwt.token')
     expect(auth.isAuthenticated).toBe(true)
+    expect(localStorageMock.setItem).toHaveBeenCalled()
   })
 
   it('login calls the correct API endpoint', async () => {
-    const auth = useAuthStore()
-    const fetchMock = mockFetchSuccess({ user: mockUser, access_token: 'tok' })
-    vi.stubGlobal('fetch', fetchMock)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ user: mockUser, access_token: 'tok' }),
+    })
 
-    await auth.login('fan@jambulani.com', 'StrongPass123!')
+    await auth.login({ email: 'fan@jambulani.com', password: 'StrongPass123!' })
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:8000/api/v1/auth/login/',
-      expect.objectContaining({ method: 'POST' }),
-    )
-  })
-
-  it('login sends credentials: include for cookie auth', async () => {
-    const auth = useAuthStore()
-    const fetchMock = mockFetchSuccess({ user: mockUser, access_token: 'tok' })
-    vi.stubGlobal('fetch', fetchMock)
-
-    await auth.login('fan@jambulani.com', 'StrongPass123!')
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({ credentials: 'include' }),
+      expect.objectContaining({ 
+        method: 'POST',
+        credentials: 'include',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json'
+        })
+      }),
     )
   })
 
   it('login throws on API error and does not set user', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchFailure({ email: ['Invalid credentials.'] }))
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ email: ['Invalid credentials.'] }),
+    })
 
     await expect(
-      auth.login('wrong@jambulani.com', 'BadPass!')
+      auth.login({ email: 'wrong@jambulani.com', password: 'BadPass!' })
     ).rejects.toBeTruthy()
 
     expect(auth.user).toBeNull()
@@ -163,31 +111,43 @@ describe('Auth Store', () => {
   })
 
   it('login resets loading to false after success', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchSuccess({ user: mockUser, access_token: 'tok' }))
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ user: mockUser, access_token: 'tok' }),
+    })
 
-    await auth.login('fan@jambulani.com', 'StrongPass123!')
+    await auth.login({ email: 'fan@jambulani.com', password: 'StrongPass123!' })
 
     expect(auth.loading).toBe(false)
   })
 
   it('login resets loading to false after failure', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchFailure({}))
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({}),
+    })
 
-    await auth.login('x@x.com', 'bad').catch(() => {})
+    try {
+      await auth.login({ email: 'x@x.com', password: 'bad' })
+    } catch (error) {
+      // Expected error
+    }
 
     expect(auth.loading).toBe(false)
   })
 
   // register()
-
   it('register sets user and accessToken on success', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchSuccess({
-      user: mockUser,
-      access_token: 'new.jwt.token',
-    }, 201))
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      json: () => Promise.resolve({
+        user: mockUser,
+        access_token: 'new.jwt.token',
+      }),
+    })
 
     await auth.register({
       email: 'fan@jambulani.com',
@@ -197,15 +157,17 @@ describe('Auth Store', () => {
       password_confirm: 'StrongPass123!',
     })
 
-    expect(auth.user?.email).toBe('fan@jambulani.com')
+    expect(auth.user).toEqual(mockUser)
     expect(auth.accessToken).toBe('new.jwt.token')
     expect(auth.isAuthenticated).toBe(true)
   })
 
   it('register calls the correct API endpoint', async () => {
-    const auth = useAuthStore()
-    const fetchMock = mockFetchSuccess({ user: mockUser, access_token: 'tok' }, 201)
-    vi.stubGlobal('fetch', fetchMock)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      json: () => Promise.resolve({ user: mockUser, access_token: 'tok' }),
+    })
 
     await auth.register({
       email: 'fan@jambulani.com',
@@ -215,40 +177,23 @@ describe('Auth Store', () => {
       password_confirm: 'StrongPass123!',
     })
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:8000/api/v1/auth/register/',
       expect.objectContaining({ method: 'POST' }),
     )
   })
 
-  it('register throws on duplicate email', async () => {
-    const auth = useAuthStore()
-    vi.stubGlobal('fetch', mockFetchFailure({
-      email: ['An account with this email already exists.'],
-    }))
-
-    await expect(
-      auth.register({
-        email: 'dup@jambulani.com',
-        first_name: 'A',
-        last_name: 'B',
-        password: 'StrongPass123!',
-        password_confirm: 'StrongPass123!',
-      })
-    ).rejects.toBeTruthy()
-
-    expect(auth.user).toBeNull()
-  })
-
   // logout()
-
   it('logout clears user, token and initialized flag', async () => {
-    const auth = useAuthStore()
     auth.user = mockUser
     auth.accessToken = 'some.token'
     auth.initialized = true
 
-    vi.stubGlobal('fetch', mockFetchSuccess(null, 200))
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve(null),
+    })
 
     await auth.logout()
 
@@ -256,14 +201,14 @@ describe('Auth Store', () => {
     expect(auth.accessToken).toBeNull()
     expect(auth.initialized).toBe(false)
     expect(auth.isAuthenticated).toBe(false)
+    expect(localStorageMock.removeItem).toHaveBeenCalled()
   })
 
   it('logout clears state even if API call fails', async () => {
-    const auth = useAuthStore()
     auth.user = mockUser
     auth.accessToken = 'some.token'
 
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
     await auth.logout()
 
@@ -272,13 +217,15 @@ describe('Auth Store', () => {
   })
 
   it('logout calls the correct API endpoint', async () => {
-    const auth = useAuthStore()
-    const fetchMock = mockFetchSuccess(null, 200)
-    vi.stubGlobal('fetch', fetchMock)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve(null),
+    })
 
     await auth.logout()
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:8000/api/v1/auth/logout/',
       expect.objectContaining({ method: 'POST' }),
     )

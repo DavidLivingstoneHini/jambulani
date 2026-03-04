@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-[70vh] flex items-center justify-center px-4 py-16">
     <div class="w-full max-w-md">
-      <!-- Header -->
       <div class="text-center mb-8">
         <NuxtLink to="/" class="inline-block mb-6">
           <div class="bg-primary px-4 py-2 inline-block">
@@ -19,6 +18,10 @@
       <form class="space-y-4" @submit.prevent="handleLogin">
         <div v-if="serverError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm font-body">
           {{ serverError }}
+        </div>
+
+        <div v-if="loginSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm font-body">
+          Login successful! Redirecting...
         </div>
 
         <div>
@@ -92,7 +95,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ 
+  middleware: 'auth',
+  layout: 'default'
+})
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -101,26 +107,62 @@ const route = useRoute()
 const form = reactive({ email: '', password: '' })
 const errors = reactive<Record<string, string>>({})
 const serverError = ref('')
+const loginSuccess = ref(false)
 const showPassword = ref(false)
 
 async function handleLogin() {
   Object.keys(errors).forEach(k => { delete (errors as Record<string, string>)[k] })
   serverError.value = ''
+  loginSuccess.value = false
 
   // Basic client-side validation
-  if (!form.email) { errors.email = 'Email is required.'; return }
-  if (!form.password) { errors.password = 'Password is required.'; return }
+  if (!form.email) { 
+    errors.email = 'Email is required.'; 
+    return 
+  }
+  if (!form.password) { 
+    errors.password = 'Password is required.'; 
+    return 
+  }
 
   try {
     await authStore.login({ email: form.email, password: form.password })
+    
+    loginSuccess.value = true
+    
+    // Get redirect URL from query or default to home
     const redirect = route.query.redirect as string
-    router.push(redirect && redirect.startsWith('/') ? redirect : '/')
-  } catch (e: unknown) {
-    const data = (e as Record<string, Record<string, unknown>>)?.data
-    if (data?.email) { errors.email = Array.isArray(data.email) ? (data.email as string[])[0] : data.email as string }
-    else if (data?.detail) { serverError.value = data.detail as string }
-    else if (data?.non_field_errors) { serverError.value = data.non_field_errors[0] }
-    else { serverError.value = 'Login failed. Please try again.' }
+    
+    setTimeout(() => {
+      if (redirect && redirect.startsWith('/')) {
+        router.push(redirect)
+      } else {
+        router.push('/')
+      }
+    }, 500)
+    
+  } catch (e: any) {
+    console.error('Login error:', e)
+    
+    // Handle different error formats
+    if (e.email) { 
+      errors.email = Array.isArray(e.email) ? e.email[0] : e.email 
+    }
+    else if (e.password) { 
+      errors.password = Array.isArray(e.password) ? e.password[0] : e.password 
+    }
+    else if (e.detail) { 
+      serverError.value = e.detail 
+    }
+    else if (e.non_field_errors) { 
+      serverError.value = Array.isArray(e.non_field_errors) ? e.non_field_errors[0] : e.non_field_errors
+    }
+    else if (e.message) {
+      serverError.value = e.message
+    }
+    else {
+      serverError.value = 'Login failed. Please check your credentials and try again.'
+    }
   }
 }
 

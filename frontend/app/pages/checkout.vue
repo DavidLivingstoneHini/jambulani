@@ -35,7 +35,7 @@
       <div class="order-1 md:order-2">
         <h2 class="font-display font-bold uppercase text-base tracking-wider mb-4 border-b border-gray-200 pb-2">Contact Information</h2>
         <div class="bg-yellow-50 border border-yellow-200 p-3 mb-4 text-sm text-yellow-800 font-body">
-          This is a demo checkout. Integrate your preferred payment provider (Stripe, PayPal, etc.) in production.
+          Demo checkout form
         </div>
         <div class="space-y-3">
           <input type="text" placeholder="Full Name" class="form-input" />

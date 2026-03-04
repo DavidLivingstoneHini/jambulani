@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <!-- Hero Banner -->
     <section
       class="relative overflow-hidden bg-gray-900"
@@ -83,7 +82,7 @@
       </div>
     </section>
 
-
+    <!-- Featured Products -->
     <section class="px-4 pt-10 pb-6">
       <div class="flex items-center justify-between mb-5">
         <h2 class="section-title mb-0">MOST POPULAR T-SHIRTS</h2>
@@ -126,12 +125,12 @@
       </div>
 
       <p v-else class="text-center py-10 text-gray-400 font-body text-sm">
-        No featured products yet — run
-        <code class="bg-gray-100 px-1 text-xs">python manage.py seed_data</code>
+        No featured products yet
       </p>
     </section>
 
 
+    <!-- Country Leagues -->
     <section class="px-4 pt-8 pb-6">
       <h2 class="section-title">COUNTRY LEAGUES</h2>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -160,6 +159,7 @@
     </section>
 
 
+    <!-- Other Collections -->
     <section class="pt-8 pb-10">
       <div class="flex items-start mb-3">
         <h2 class="mr-6 uppercase text-2xl font-bold">Other collections</h2>
@@ -185,14 +185,13 @@
     </section>
 
 
+    <!-- Personalization & Social Networks -->
     <section class="py-10 pb-14">
       <div class="grid md:grid-cols-2 grid-cols-1 gap-6 text-white">
-
-        <!-- Personalization -->
         <div class="relative px-6 md:px-12 pt-52 pb-8">
           <div
             class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style="background-image: url('/assets/images/personalization-bg.jpg'); background-color: #1a1a2e;"
+            style="background-image: url('/assets/images/personalization.jpg'); background-color: #1a1a2e;"
           />
           <div class="absolute inset-0" style="background-color: rgba(0,0,0,0.5);" />
           <div class="relative z-10">
@@ -204,11 +203,10 @@
           </div>
         </div>
 
-        <!-- Social Networks -->
         <div class="relative px-6 md:px-12 pt-52 pb-8">
           <div
             class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style="background-image: url('/assets/images/social-bg.jpg'); background-color: #111827;"
+            style="background-image: url('/assets/images/social-networks.jpg'); background-color: #111827;"
           />
           <div class="absolute inset-0" style="background-color: rgba(0,0,0,0.5);" />
           <div class="relative z-10">
@@ -235,7 +233,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </section>
 

@@ -15,6 +15,11 @@ interface AuthResponse {
   access_token: string
 }
 
+interface LoginPayload {
+  email: string
+  password: string
+}
+
 interface RegisterPayload {
   email: string
   first_name: string
@@ -40,6 +45,20 @@ export const useAuthStore = defineStore('auth', {
       if (!process.client || this.initialized) return
       this.initialized = true
 
+      const storedToken = localStorage.getItem('access_token')
+      const storedUser = localStorage.getItem('user')
+      
+      if (storedToken && storedUser) {
+        try {
+          this.accessToken = storedToken
+          this.user = JSON.parse(storedUser)
+          return
+        } catch (e) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('user')
+        }
+      }
+
       try {
         const config = useRuntimeConfig()
         const baseURL = config.public.apiBase as string
@@ -48,35 +67,55 @@ export const useAuthStore = defineStore('auth', {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
         })
+        
         if (res.ok) {
           const data = await res.json() as AuthResponse
           this.user = data.user
           this.accessToken = data.access_token
+          
+          // Store in localStorage for persistence
+          localStorage.setItem('access_token', data.access_token)
+          localStorage.setItem('user', JSON.stringify(data.user))
         }
-      } catch {
-        // Silent fail
+      } catch (error) {
+        console.error('Failed to refresh token:', error)
       }
     },
 
-    async login(email: string, password: string): Promise<AuthResponse> {
+    async login(payload: LoginPayload): Promise<AuthResponse> {
       this.loading = true
       try {
         const config = useRuntimeConfig()
         const baseURL = config.public.apiBase as string
+        
+        console.log('Logging in with:', payload.email)
+        
         const res = await fetch(`${baseURL}/auth/login/`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify(payload),
         })
+        
+        const data = await res.json()
+        
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          throw err
+          console.error('Login failed:', data)
+          throw data
         }
-        const data = await res.json() as AuthResponse
+        
+        console.log('Login successful:', data)
+        
         this.user = data.user
         this.accessToken = data.access_token
+        
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
         return data
+      } catch (error) {
+        console.error('Login error:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -87,20 +126,35 @@ export const useAuthStore = defineStore('auth', {
       try {
         const config = useRuntimeConfig()
         const baseURL = config.public.apiBase as string
+        
+        console.log('Registering with:', payload.email)
+        
         const res = await fetch(`${baseURL}/auth/register/`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
+        
+        const data = await res.json()
+        
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          throw err
+          console.error('Registration failed:', data)
+          throw data
         }
-        const data = await res.json() as AuthResponse
+        
+        console.log('Registration successful:', data)
+        
         this.user = data.user
         this.accessToken = data.access_token
+        
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
         return data
+      } catch (error) {
+        console.error('Registration error:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -110,16 +164,77 @@ export const useAuthStore = defineStore('auth', {
       try {
         const config = useRuntimeConfig()
         const baseURL = config.public.apiBase as string
+        
         await fetch(`${baseURL}/auth/logout/`, {
           method: 'POST',
           credentials: 'include',
         })
-      } catch {} 
-      finally {
+      } catch (error) {
+        console.error('Logout error:', error)
+      } finally {
         this.user = null
         this.accessToken = null
         this.initialized = false
+        
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('user')
       }
+    },
+
+    async updateProfile(data: Partial<AuthUser>) {
+      if (!this.user) throw new Error('Not authenticated')
+      
+      const config = useRuntimeConfig()
+      const baseURL = config.public.apiBase as string
+      
+      const res = await fetch(`${baseURL}/auth/me/`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(data),
+      })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw error
+      }
+      
+      const updatedUser = await res.json()
+      this.user = updatedUser
+      
+      // Update stored user
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      
+      return updatedUser
+    },
+
+    async changePassword(data: { current_password: string; new_password: string; new_password_confirm: string }) {
+      if (!this.user) throw new Error('Not authenticated')
+      
+      const config = useRuntimeConfig()
+      const baseURL = config.public.apiBase as string
+      
+      const res = await fetch(`${baseURL}/auth/password/change/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(data),
+      })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw error
+      }
+      
+      await this.logout()
+      
+      return await res.json()
     },
   },
 })

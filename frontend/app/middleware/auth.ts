@@ -4,7 +4,8 @@
  * Redirects to /login with a `redirect` query param for post-login navigation.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (!process.client) return
+  // Skip middleware on server
+  if (import.meta.server) return
 
   const authStore = useAuthStore()
 
@@ -12,18 +13,23 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await authStore.initOnClient()
   }
 
+  const publicRoutes = ['/login', '/register', '/', '/products', '/products/[slug]']
+  const isPublicRoute = publicRoutes.some(route => to.path.startsWith(route))
+
+  // Protected routes that require auth
   const protectedRoutes = ['/account', '/checkout']
   const requiresAuth = protectedRoutes.some(route => to.path.startsWith(route))
 
   if (requiresAuth && !authStore.isAuthenticated) {
+    // Redirect to login
     return navigateTo({
       path: '/login',
       query: { redirect: to.fullPath },
     })
   }
 
-  const authOnlyRoutes = ['/login', '/register']
-  if (authOnlyRoutes.includes(to.path) && authStore.isAuthenticated) {
+  // If user is authenticated redirect to home
+  if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
     return navigateTo('/')
   }
 })

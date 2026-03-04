@@ -1,28 +1,22 @@
 /**
  * AppFooter component unit tests.
- *
- * Tests: newsletter subscription form — success message,
- * error message, empty email guard, and API call correctness.
- * The footer uses useApi() composable internally.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { setActivePinia, createPinia } from 'pinia'
 import AppFooter from '../../app/components/layout/AppFooter.vue'
 
-
+// Create a mock for apiFetch
 const mockApiFetch = vi.fn()
 
+// Mock useApi before importing the component
 vi.mock('../../app/composables/useApi', () => ({
-  useApi: () => ({ apiFetch: mockApiFetch }),
+  useApi: () => ({
+    apiFetch: mockApiFetch
+  })
 }))
-
-vi.stubGlobal('useRuntimeConfig', () => ({
-  public: { apiBase: 'http://localhost:8000/api/v1' },
-}))
-vi.stubGlobal('useAuthStore', () => ({ accessToken: null }))
 
 // Helper
-
 function mountFooter() {
   return mount(AppFooter, {
     global: {
@@ -36,12 +30,11 @@ function mountFooter() {
   })
 }
 
-// Tests
-
 describe('AppFooter — Newsletter', () => {
-
   beforeEach(() => {
+    setActivePinia(createPinia())
     vi.clearAllMocks()
+    mockApiFetch.mockClear()
   })
 
   it('renders the email input field', () => {
@@ -85,10 +78,10 @@ describe('AppFooter — Newsletter', () => {
     await wrapper.find('button').trigger('click')
     await flushPromises()
 
-    expect(mockApiFetch).toHaveBeenCalledWith(
-      '/newsletter/subscribe/',
-      expect.objectContaining({ method: 'POST' }),
-    )
+    expect(mockApiFetch).toHaveBeenCalledWith('/newsletter/subscribe/', {
+      method: 'POST',
+      body: JSON.stringify({ email: 'fan@jambulani.com' }),
+    })
   })
 
   it('shows the API error message on failure', async () => {

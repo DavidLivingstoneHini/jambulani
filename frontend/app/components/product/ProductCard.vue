@@ -1,11 +1,11 @@
 <template>
-  <NuxtLink :to="`/products/${product.slug}`" class="product-card group block">
+  <NuxtLink :to="`/products/${product?.slug || '#'}`" class="product-card group block">
     <!-- Image container -->
     <div class="relative bg-gray-100 overflow-hidden" style="aspect-ratio: 1/1;">
       <img
-        v-if="product.primary_image"
+        v-if="product?.primary_image"
         :src="product.primary_image"
-        :alt="product.name"
+        :alt="product?.name || 'Product image'"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         loading="lazy"
       />
@@ -17,7 +17,7 @@
       </div>
 
       <div
-        v-if="product.discount_percentage > 0"
+        v-if="product?.discount_percentage && product.discount_percentage > 0"
         class="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 uppercase font-display"
       >
         Save {{ product.discount_percentage }}%
@@ -26,11 +26,11 @@
 
     <div class="pt-2 pb-1">
       <p class="font-display font-semibold text-[12px] leading-[1.3] text-gray-800 line-clamp-2 mb-1">
-        {{ product.name }}
+        {{ product?.name || 'Product' }}
       </p>
       <div class="flex items-baseline gap-1.5 flex-wrap">
-        <span class="font-display font-bold text-[16px] text-gray-900">€{{ product.price }}</span>
-        <span v-if="product.original_price" class="text-red-500 line-through text-[12px] font-body">
+        <span class="font-display font-bold text-[16px] text-gray-900">€{{ product?.price || '0.00' }}</span>
+        <span v-if="product?.original_price" class="text-red-500 line-through text-[12px] font-body">
           €{{ product.original_price }}
         </span>
       </div>
@@ -39,6 +39,9 @@
 </template>
 
 <script setup lang="ts">
+import type { ProductList } from '~/app/types'
 
-defineProps<{ product: ProductList }>()
+defineProps<{ 
+  product?: ProductList | null 
+}>()
 </script>

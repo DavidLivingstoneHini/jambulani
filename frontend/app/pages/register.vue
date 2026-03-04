@@ -19,6 +19,10 @@
           {{ serverError }}
         </div>
 
+        <div v-if="registerSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm font-body">
+          Account created successfully! Redirecting...
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">First Name</label>
@@ -84,7 +88,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ 
+  middleware: 'auth',
+  layout: 'default'
+})
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -98,6 +105,7 @@ const form = reactive({
 })
 const errors = reactive<Record<string, string>>({})
 const serverError = ref('')
+const registerSuccess = ref(false)
 const showPassword = ref(false)
 
 // Simple password strength calculation
@@ -121,27 +129,65 @@ function passwordStrengthColor(bar: number) {
 async function handleRegister() {
   Object.keys(errors).forEach(k => { delete (errors as Record<string, string>)[k] })
   serverError.value = ''
+  registerSuccess.value = false
 
+  // Validate passwords match
   if (form.password !== form.password_confirm) {
     errors.password_confirm = 'Passwords do not match.'
     return
   }
 
+  // Validate password length
+  if (form.password.length < 8) {
+    errors.password = 'Password must be at least 8 characters.'
+    return
+  }
+
   try {
-    await authStore.register({ ...form })
-    router.push('/')
-  } catch (e: unknown) {
-    const data = (e as Record<string, unknown> | null)?.data as Record<string, unknown> | null
-    if (data && typeof data === 'object') {
-      Object.entries(data).forEach(([key, val]) => {
-        if (key in form || key === 'password_confirm') {
-          (errors as Record<string, string>)[key] = Array.isArray(val) ? (val as string[])[0] : String(val)
-        } else if (key === 'detail' || key === 'non_field_errors') {
-          serverError.value = Array.isArray(val) ? (val as string[])[0] : String(val)
-        }
-      })
+    await authStore.register({ 
+      email: form.email,
+      first_name: form.first_name,
+      last_name: form.last_name,
+      password: form.password,
+      password_confirm: form.password_confirm
+    })
+    
+    registerSuccess.value = true
+    
+    // Redirect to home after successful registration
+    setTimeout(() => {
+      router.push('/')
+    }, 500)
+    
+  } catch (e: any) {
+    console.error('Registration error:', e)
+    
+    // Handle different error formats
+    if (e.email) { 
+      errors.email = Array.isArray(e.email) ? e.email[0] : e.email 
     }
-    if (!serverError.value && Object.keys(errors).length === 0) {
+    else if (e.first_name) { 
+      errors.first_name = Array.isArray(e.first_name) ? e.first_name[0] : e.first_name 
+    }
+    else if (e.last_name) { 
+      errors.last_name = Array.isArray(e.last_name) ? e.last_name[0] : e.last_name 
+    }
+    else if (e.password) { 
+      errors.password = Array.isArray(e.password) ? e.password[0] : e.password 
+    }
+    else if (e.password_confirm) { 
+      errors.password_confirm = Array.isArray(e.password_confirm) ? e.password_confirm[0] : e.password_confirm 
+    }
+    else if (e.detail) { 
+      serverError.value = e.detail 
+    }
+    else if (e.non_field_errors) { 
+      serverError.value = Array.isArray(e.non_field_errors) ? e.non_field_errors[0] : e.non_field_errors
+    }
+    else if (e.message) {
+      serverError.value = e.message
+    }
+    else {
       serverError.value = 'Registration failed. Please try again.'
     }
   }
