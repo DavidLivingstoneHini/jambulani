@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', {
           this.accessToken = data.access_token
         }
       } catch {
-        // Silent fail — user simply not authenticated
+        // Silent fail
       }
     },
 
