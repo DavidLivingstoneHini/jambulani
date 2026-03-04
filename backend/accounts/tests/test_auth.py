@@ -306,6 +306,16 @@ class TokenRefreshTest(TestCase):
         res = self.client.post(TOKEN_REFRESH_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_refresh_token_reuse_detection(self):
+        """Using same refresh token twice should revoke the family"""
+        # First refresh - should work
+        res1 = self.client.post(TOKEN_REFRESH_URL)
+        self.assertEqual(res1.status_code, status.HTTP_200_OK)
+
+        # Second refresh with same token (still in cookies) - should fail
+        res2 = self.client.post(TOKEN_REFRESH_URL)
+        self.assertEqual(res2.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 # Profile (Me)
 class ProfileTest(TestCase):

@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 from accounts.authentication import JWTAuthentication
 from .models import (
@@ -70,20 +72,34 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         return ProductListSerializer
 
     def get_queryset(self):
-        """Optimize queryset with proper joins for all filter types"""
-        queryset = super().get_queryset()
+        """Return all active products without any filters applied"""
+        queryset = Product.objects.filter(is_active=True).select_related(
+            "league", "category", "collection", "size_chart"
+        ).prefetch_related(
+            Prefetch("images", queryset=ProductImage.objects.order_by("sort_order")),
+            "patches"
+        )
 
-        # Handle search param directly for better control
-        search_param = self.request.query_params.get('search', '')
-        if search_param:
-            queryset = queryset.filter(
-                Q(name__icontains=search_param) |
-                Q(description__icontains=search_param) |
-                Q(league__name__icontains=search_param) |
-                Q(category__name__icontains=search_param)
-            ).distinct()
+        # Log the count for debugging
+        print(f"Total active products in database: {queryset.count()}")
 
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        """Override list to ensure we always return results"""
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Log filter parameters
+        print(f"Filter params: {request.query_params}")
+        print(f"Filtered product count: {queryset.count()}")
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_object(self):
         """Handle both numeric ID and slug lookup"""
