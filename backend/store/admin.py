@@ -77,10 +77,7 @@ class LeagueAdmin(admin.ModelAdmin):
         return super().get_queryset(request).annotate(_pc=Count("products"))
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Collection
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display  = ["image_thumb", "name", "slug", "product_count", "status_badge", "sort_order"]
