@@ -63,22 +63,24 @@
 
           <!-- Search -->
           <div class="px-2 bg-white flex-grow flex items-center py-2 border-r border-slate-100">
-            <input
-              v-model="searchQuery"
-              class="outline-none border-0 w-full placeholder:text-sm text-[13px] font-body"
-              type="search"
-              placeholder="What are you looking for?"
-              @keydown.enter="handleSearch"
-            />
-            <div class="flex shrink-0">
-              <button class="bg-primary px-4 py-2 text-[11px] font-body font-semibold" @click="handleSearch">Search</button>
-              <button class="bg-black px-3 py-2 grid place-items-center mr-9" @click="handleSearch">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M11.2907 10.3433C12.2088 9.24903 12.7616 7.83803 12.7616 6.2979C12.7616 2.81967 9.94191 5.9873e-07 6.46368 0C2.98544 1.52039e-07 0.165771 2.81967 0.165771 6.2979C0.165771 9.77614 2.98544 12.5958 6.46368 12.5958C7.83398 12.5958 9.10207 12.1582 10.1358 11.415L12.7208 14L13.8341 12.8867L11.2907 10.3433ZM11.1871 6.2979C11.1871 8.90658 9.07235 11.0213 6.46368 11.0213C3.855 11.0213 1.74025 8.90658 1.74025 6.2979C1.74025 3.68923 3.855 1.57448 6.46368 1.57448C9.07235 1.57448 11.1871 3.68923 11.1871 6.2979Z" fill="white" />
-                </svg>
-              </button>
-            </div>
-          </div>
+    <input
+      v-model="searchQuery"
+      class="outline-none border-0 w-full placeholder:text-sm text-[13px] font-body"
+      type="search"
+      placeholder="What are you looking for?"
+      @keydown.enter="handleSearch"
+    />
+    <div class="flex shrink-0">
+      <button class="bg-primary px-4 py-2 text-[11px] font-body font-semibold" @click="handleSearch">
+        Search
+      </button>
+      <button class="bg-black px-3 py-2 grid place-items-center mr-9" @click="handleSearch">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.2907 10.3433C12.2088 9.24903 12.7616 7.83803 12.7616 6.2979C12.7616 2.81967 9.94191 5.9873e-07 6.46368 0C2.98544 1.52039e-07 0.165771 2.81967 0.165771 6.2979C0.165771 9.77614 2.98544 12.5958 6.46368 12.5958C7.83398 12.5958 9.10207 12.1582 10.1358 11.415L12.7208 14L13.8341 12.8867L11.2907 10.3433ZM11.1871 6.2979C11.1871 8.90658 9.07235 11.0213 6.46368 11.0213C3.855 11.0213 1.74025 8.90658 1.74025 6.2979C1.74025 3.68923 3.855 1.57448 6.46368 1.57448C9.07235 1.57448 11.1871 3.68923 11.1871 6.2979Z" fill="white" />
+        </svg>
+      </button>
+    </div>
+  </div>
 
           <button class="border-r border-slate-100 py-2 grid place-items-center px-7 hover:bg-slate-100 relative" @click="cartStore.isOpen = !cartStore.isOpen">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -231,10 +233,10 @@
 </template>
 
 <script setup lang="ts">
-
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
@@ -250,7 +252,11 @@ onClickOutside(collectionsMenuRef, () => { collectionsMenuOpen.value = false })
 function handleSearch() {
   const q = searchQuery.value.trim()
   if (q) {
-    router.push(`/products?search=${encodeURIComponent(q)}`)
+    // Navigate to products page with search query
+    router.push({
+      path: '/products',
+      query: { search: q }
+    })
     mobileMenuOpen.value = false
     mobileSearchOpen.value = false
     searchQuery.value = ''

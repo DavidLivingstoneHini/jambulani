@@ -51,8 +51,8 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
     discount_percentage = serializers.IntegerField(read_only=True)
-    league_name = serializers.CharField(source="league.name", read_only=True)
-    category_name = serializers.CharField(source="category.name", read_only=True)
+    league_name = serializers.CharField(source="league.name", read_only=True, default=None)
+    category_name = serializers.CharField(source="category.name", read_only=True, default=None)
 
     class Meta:
         model = Product

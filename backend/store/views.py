@@ -3,13 +3,18 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.db.models import Q, Prefetch
+from django_filters.rest_framework import DjangoFilterBackend
 
 from accounts.authentication import JWTAuthentication
-from .models import League, Collection, Category, Patch, Product, CartItem, NewsletterSubscriber
+from .models import (
+    League, Collection, Category, Patch, Product, ProductImage,
+    CartItem, NewsletterSubscriber, SizeChart
+)
 from .serializers import (
     LeagueSerializer, CollectionSerializer, CategorySerializer, PatchSerializer,
     ProductListSerializer, ProductDetailSerializer, CartItemSerializer,
-    NewsletterSubscribeSerializer,
+    NewsletterSubscribeSerializer, SizeChartSerializer
 )
 from .filters import ProductFilter
 
@@ -42,11 +47,19 @@ class PatchViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Product listing with full filtering, searching, and ordering support.
+    """
     queryset = Product.objects.filter(is_active=True).select_related(
         "league", "category", "collection", "size_chart"
-    ).prefetch_related("images", "patches")
-    filterset_class = ProductFilter
+    ).prefetch_related(
+        Prefetch("images", queryset=ProductImage.objects.order_by("sort_order")),
+        "patches"
+    )
+    serializer_class = ProductListSerializer
     permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
     search_fields = ["name", "description", "league__name", "category__name"]
     ordering_fields = ["price", "created_at", "name"]
     ordering = ["-created_at"]
@@ -56,18 +69,47 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             return ProductDetailSerializer
         return ProductListSerializer
 
+    def get_queryset(self):
+        """Optimize queryset with proper joins for all filter types"""
+        queryset = super().get_queryset()
+
+        # Handle search param directly for better control
+        search_param = self.request.query_params.get('search', '')
+        if search_param:
+            queryset = queryset.filter(
+                Q(name__icontains=search_param) |
+                Q(description__icontains=search_param) |
+                Q(league__name__icontains=search_param) |
+                Q(category__name__icontains=search_param)
+            ).distinct()
+
+        return queryset
+
     def get_object(self):
+        """Handle both numeric ID and slug lookup"""
         queryset = self.get_queryset()
         lookup_value = self.kwargs[self.lookup_field]
-        obj = get_object_or_404(queryset, pk=lookup_value) if lookup_value.isdigit() \
-            else get_object_or_404(queryset, slug=lookup_value)
+
+        if lookup_value.isdigit():
+            obj = get_object_or_404(queryset, pk=lookup_value)
+        else:
+            obj = get_object_or_404(queryset, slug=lookup_value)
+
         return obj
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], url_path="featured")
     def featured(self, request):
-        qs = self.get_queryset().filter(is_featured=True)[:8]
-        serializer = ProductListSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
+        """Get featured products with caching headers"""
+        qs = self.get_queryset().filter(is_featured=True)[:12]
+        serializer = ProductListSerializer(
+            qs,
+            many=True,
+            context={"request": request}
+        )
+        response = Response(serializer.data)
+        # Add cache headers for featured products
+        response['Cache-Control'] = 'max-age=300'  # 5 minutes
+        return response
 
 
 def _get_session_key(request):

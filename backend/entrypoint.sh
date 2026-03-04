@@ -14,11 +14,21 @@ until python -c "import psycopg2; psycopg2.connect(
 done
 echo "PostgreSQL ready."
 
+# Make migrations if needed
+python manage.py makemigrations --noinput
+
+# Apply migrations
 python manage.py migrate --noinput
+
+# Collect static files
 python manage.py collectstatic --noinput
+
+# Seed data (only if database is empty)
 python manage.py seed_data
 
 exec gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers 3 \
-    --timeout 120
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile -

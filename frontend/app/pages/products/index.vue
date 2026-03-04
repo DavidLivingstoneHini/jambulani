@@ -12,47 +12,75 @@
         <div class="border border-gray-200 p-4">
           <h3 class="font-display font-bold uppercase text-sm tracking-wider mb-4">Filters</h3>
 
+          <!-- Search Input -->
           <div class="mb-4">
             <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               Search
             </label>
-            <input
-              v-model="filters.search"
-              type="text"
-              placeholder="Search products..."
-              class="form-input text-xs"
-              @input="debouncedFetch"
-            />
+            <div class="relative">
+              <input
+                v-model="filters.search"
+                type="text"
+                placeholder="Search products..."
+                class="form-input text-xs pr-8"
+                @input="debouncedSearch"
+              />
+              <svg
+                v-if="filters.search"
+                class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                @click="clearSearch"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
           </div>
 
+          <!-- League Filter -->
           <div class="mb-4">
             <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               League
             </label>
-            <select v-model="filters.league" class="form-select text-xs" @change="doFetch">
+            <select v-model="filters.league" class="form-select text-xs" @change="applyFilters">
               <option value="">All Leagues</option>
-              <option v-for="l in leagues" :key="l.id" :value="l.slug">{{ l.name }}</option>
+              <option v-if="leagues" v-for="l in leagues" :key="l.id" :value="l.slug">{{ l.name }}</option>
             </select>
           </div>
 
+          <!-- Collection Filter -->
+          <div class="mb-4" v-if="collections && collections.length">
+            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+              Collection
+            </label>
+            <select v-model="filters.collection" class="form-select text-xs" @change="applyFilters">
+              <option value="">All Collections</option>
+              <option v-for="c in collections" :key="c.id" :value="c.slug">{{ c.name }}</option>
+            </select>
+          </div>
+
+          <!-- Price Range -->
           <div class="mb-4">
             <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
-              Price Range
+              Price Range (€)
             </label>
             <div class="flex gap-2">
               <input
                 v-model.number="filters.min_price"
                 type="number"
                 placeholder="Min"
+                min="0"
                 class="form-input text-xs w-1/2"
-                @change="doFetch"
+                @change="applyFilters"
               />
               <input
                 v-model.number="filters.max_price"
                 type="number"
                 placeholder="Max"
+                min="0"
                 class="form-input text-xs w-1/2"
-                @change="doFetch"
+                @change="applyFilters"
               />
             </div>
           </div>
@@ -61,19 +89,66 @@
         </div>
       </aside>
 
+      <!-- Main Content -->
       <div class="flex-1">
+        <!-- Active Filters -->
+        <div v-if="hasActiveFilters" class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="text-xs text-gray-500 font-body">Active filters:</span>
+          <span
+            v-if="filters.search"
+            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 text-xs rounded"
+          >
+            Search: "{{ filters.search }}"
+            <button @click="clearSearch" class="text-gray-500 hover:text-gray-700">×</button>
+          </span>
+          <span
+            v-if="filters.league && selectedLeagueName"
+            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 text-xs rounded"
+          >
+            {{ selectedLeagueName }}
+            <button @click="filters.league = ''; applyFilters()" class="text-gray-500 hover:text-gray-700">×</button>
+          </span>
+          <span
+            v-if="filters.collection && selectedCollectionName"
+            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 text-xs rounded"
+          >
+            {{ selectedCollectionName }}
+            <button @click="filters.collection = ''; applyFilters()" class="text-gray-500 hover:text-gray-700">×</button>
+          </span>
+          <span
+            v-if="filters.min_price || filters.max_price"
+            class="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 text-xs rounded"
+          >
+            Price: {{ filters.min_price || '0' }} - {{ filters.max_price || '∞' }} €
+            <button @click="filters.min_price = ''; filters.max_price = ''; applyFilters()" class="text-gray-500 hover:text-gray-700">×</button>
+          </span>
+          <button
+            class="text-xs text-gray-500 underline hover:text-gray-700"
+            @click="clearFilters"
+          >
+            Clear all
+          </button>
+        </div>
+
+        <!-- Results Header -->
         <div class="flex items-center justify-between mb-6">
           <p class="text-sm text-gray-500 font-body">
-            <span v-if="!pending">{{ totalCount }} products</span>
+            <span v-if="!pending && totalCount !== null">{{ totalCount }} product{{ totalCount !== 1 ? 's' : '' }} found</span>
+            <span v-else-if="pending" class="text-gray-400">Loading products...</span>
+            <span v-if="filters.search && !pending && totalCount !== null" class="text-xs ml-2 text-gray-400">
+              for "{{ filters.search }}"
+            </span>
           </p>
-          <select v-model="ordering" class="form-select text-sm w-48" @change="doFetch">
+          <select v-model="ordering" class="form-select text-sm w-48" @change="applyFilters">
             <option value="-created_at">Newest First</option>
             <option value="price">Price: Low to High</option>
             <option value="-price">Price: High to Low</option>
             <option value="name">Name A–Z</option>
+            <option value="-name">Name Z–A</option>
           </select>
         </div>
 
+        <!-- Loading State -->
         <div v-if="pending" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div v-for="n in 8" :key="n" class="animate-pulse">
             <div class="aspect-square bg-gray-200 mb-2" />
@@ -82,34 +157,53 @@
           </div>
         </div>
 
-        <div v-else-if="products.length === 0" class="text-center py-16 text-gray-400">
+        <!-- Empty State -->
+        <div v-else-if="!products || products.length === 0" class="text-center py-16 text-gray-400">
+          <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <p class="font-display font-semibold uppercase text-sm tracking-wide">No products found</p>
-          <button class="mt-4 text-sm underline font-body" @click="clearFilters">Clear filters</button>
+          <p class="text-xs mt-1">Try adjusting your search or filters</p>
+          <button class="mt-4 text-sm underline font-body hover:text-gray-600" @click="clearFilters">
+            Clear all filters
+          </button>
         </div>
 
+        <!-- Product Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+          <ProductCard
+            v-for="product in products"
+            :key="product.id"
+            :product="product"
+          />
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
+        <div v-if="!pending && totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
           <button
             :disabled="currentPage === 1"
             class="border border-gray-300 px-3 py-2 text-sm font-body disabled:opacity-40 hover:bg-gray-100 transition-colors"
             @click="goToPage(currentPage - 1)"
-          >← Prev</button>
+          >
+            ← Prev
+          </button>
           <button
             v-for="p in visiblePages"
             :key="p"
             class="border px-3 py-2 text-sm font-body transition-colors"
             :class="p === currentPage ? 'bg-primary border-primary font-bold' : 'border-gray-300 hover:bg-gray-100'"
             @click="goToPage(p)"
-          >{{ p }}</button>
+          >
+            {{ p }}
+          </button>
           <button
             :disabled="currentPage === totalPages"
             class="border border-gray-300 px-3 py-2 text-sm font-body disabled:opacity-40 hover:bg-gray-100 transition-colors"
             @click="goToPage(currentPage + 1)"
-          >Next →</button>
+          >
+            Next →
+          </button>
         </div>
       </div>
     </div>
@@ -117,57 +211,131 @@
 </template>
 
 <script setup lang="ts">
-import type { ProductList, League, PaginatedResponse } from '~/app/types'
+import type { ProductList, League, Collection, PaginatedResponse } from '~/app/types'
+import { useDebounceFn } from '@vueuse/core'
+
+definePageMeta({
+  // Disable SSR for this page to avoid hydration issues with filters
+  ssr: false
+})
 
 const { apiFetch } = useApi()
 const route = useRoute()
+const router = useRouter()
 
+// State with proper null checks
 const products = ref<ProductList[]>([])
-const totalCount = ref(0)
+const totalCount = ref<number | null>(null)
 const pending = ref(false)
 const currentPage = ref(1)
 const ordering = ref('-created_at')
+const leagues = ref<League[]>([])
+const collections = ref<Collection[]>([])
 
+// Initialize filters from URL query params with safe defaults
 const filters = reactive({
-  search: (route.query.search as string) ?? '',
-  league: (route.query.league as string) ?? '',
-  collection: (route.query.collection as string) ?? '',
-  min_price: '' as string | number,
-  max_price: '' as string | number,
+  search: (route.query.search as string) || '',
+  league: (route.query.league as string) || '',
+  collection: (route.query.collection as string) || '',
+  min_price: (route.query.min_price as string) || '',
+  max_price: (route.query.max_price as string) || '',
 })
 
-const totalPages = computed(() => Math.ceil(totalCount.value / 12))
+// Fetch leagues and collections on client-side only
+onMounted(async () => {
+  try {
+    const [leaguesData, collectionsData] = await Promise.all([
+      apiFetch<League[]>('/leagues/').catch(() => []),
+      apiFetch<Collection[]>('/collections/').catch(() => [])
+    ])
+    leagues.value = leaguesData || []
+    collections.value = collectionsData || []
+  } catch (error) {
+    console.error('Failed to fetch filter options:', error)
+  }
+  
+  // Initial products fetch
+  await fetchProducts()
+})
+
+// Computed properties with safe fallbacks
+const hasActiveFilters = computed(() => {
+  return !!(filters.search || filters.league || filters.collection || filters.min_price || filters.max_price)
+})
+
+const selectedLeagueName = computed(() => {
+  if (!filters.league || !leagues.value) return ''
+  const league = leagues.value.find(l => l && l.slug === filters.league)
+  return league?.name || filters.league
+})
+
+const selectedCollectionName = computed(() => {
+  if (!filters.collection || !collections.value) return ''
+  const collection = collections.value.find(c => c && c.slug === filters.collection)
+  return collection?.name || filters.collection
+})
+
+const totalPages = computed(() => {
+  if (!totalCount.value) return 1
+  return Math.ceil(totalCount.value / 12)
+})
+
 const visiblePages = computed(() => {
   const pages: number[] = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, currentPage.value + 2)
-  for (let i = start; i <= end; i++) pages.push(i)
+  const total = totalPages.value
+  const current = currentPage.value
+  
+  // Safety check for invalid values
+  if (!total || total <= 1) return pages
+  
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
   return pages
 })
 
-const { data: leaguesData } = await useAsyncData(
-  'leagues-filter',
-  () => apiFetch<League[]>('/leagues/').catch(() => [] as League[])
-)
-const leagues = computed<League[]>(() => leaguesData.value ?? [])
+// Update URL with current filters
+const updateUrl = () => {
+  const query: Record<string, string> = {}
+  
+  if (filters.search) query.search = filters.search
+  if (filters.league) query.league = filters.league
+  if (filters.collection) query.collection = filters.collection
+  if (filters.min_price) query.min_price = String(filters.min_price)
+  if (filters.max_price) query.max_price = String(filters.max_price)
+  if (ordering.value !== '-created_at') query.sort = ordering.value
+  if (currentPage.value > 1) query.page = String(currentPage.value)
 
-async function doFetch() {
+  router.replace({ query })
+}
+
+// Fetch products with current filters
+async function fetchProducts() {
   pending.value = true
+  
   const params = new URLSearchParams()
+  
+  // Add filters to params
   if (filters.search) params.set('search', filters.search)
   if (filters.league) params.set('league', filters.league)
   if (filters.collection) params.set('collection', filters.collection)
-  if (filters.min_price !== '') params.set('min_price', String(filters.min_price))
-  if (filters.max_price !== '') params.set('max_price', String(filters.max_price))
-  params.set('ordering', ordering.value)
+  if (filters.min_price) params.set('min_price', String(filters.min_price))
+  if (filters.max_price) params.set('max_price', String(filters.max_price))
+  if (ordering.value) params.set('ordering', ordering.value)
   params.set('page', String(currentPage.value))
 
   try {
     const data = await apiFetch<PaginatedResponse<ProductList>>(`/products/?${params.toString()}`)
-    products.value = data.results
-    totalCount.value = data.count
-  } catch (e) {
-    console.error('Failed to fetch products', e)
+    products.value = data.results || []
+    totalCount.value = data.count || 0
+    
+    // Update URL with current filters
+    updateUrl()
+  } catch (error) {
+    console.error('Failed to fetch products:', error)
     products.value = []
     totalCount.value = 0
   } finally {
@@ -175,32 +343,71 @@ async function doFetch() {
   }
 }
 
-function clearFilters() {
+// Debounced search to avoid too many API calls
+const debouncedSearch = useDebounceFn(() => {
+  currentPage.value = 1
+  fetchProducts()
+}, 400)
+
+// Apply filters immediately (for select changes)
+const applyFilters = () => {
+  currentPage.value = 1
+  fetchProducts()
+}
+
+// Clear search
+const clearSearch = () => {
+  filters.search = ''
+  currentPage.value = 1
+  fetchProducts()
+}
+
+// Clear all filters
+const clearFilters = () => {
   filters.search = ''
   filters.league = ''
   filters.collection = ''
   filters.min_price = ''
   filters.max_price = ''
+  ordering.value = '-created_at'
   currentPage.value = 1
-  doFetch()
+  fetchProducts()
 }
 
-function goToPage(page: number) {
+// Pagination
+const goToPage = (page: number) => {
+  if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-  if (process.client) window.scrollTo({ top: 0, behavior: 'smooth' })
-  doFetch()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  fetchProducts()
 }
 
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-function debouncedFetch() {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    currentPage.value = 1
-    doFetch()
-  }, 400)
-}
+// Watch for route changes to sync filters (for browser back/forward)
+watch(
+  () => route.query,
+  (newQuery) => {
+    // Only sync if we're not already updating
+    const shouldUpdate = 
+      newQuery.search !== filters.search ||
+      newQuery.league !== filters.league ||
+      newQuery.collection !== filters.collection ||
+      newQuery.min_price !== filters.min_price ||
+      newQuery.max_price !== filters.max_price
+    
+    if (shouldUpdate) {
+      filters.search = (newQuery.search as string) || ''
+      filters.league = (newQuery.league as string) || ''
+      filters.collection = (newQuery.collection as string) || ''
+      filters.min_price = (newQuery.min_price as string) || ''
+      filters.max_price = (newQuery.max_price as string) || ''
+      currentPage.value = Number(newQuery.page) || 1
+      fetchProducts()
+    }
+  },
+  { deep: true }
+)
 
-onMounted(() => doFetch())
-
-useHead({ title: 'Products — Jambulani' })
+useHead({
+  title: 'Products — Jambulani'
+})
 </script>
