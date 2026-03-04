@@ -1,38 +1,30 @@
-# ── Nuxt ──────────────────────────────────────────────────────────
 .nuxt/
 .output/
 .nitro/
 .cache/
 
-# ── Node ──────────────────────────────────────────────────────────
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# ── Environment / secrets ─────────────────────────────────────────
-# .env is NEVER committed — copy from .env.example
 .env
 .env.local
 .env.production
 
-# ── Build output ──────────────────────────────────────────────────
 dist/
 .vercel/
 .netlify/
 
-# ── IDE ───────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ── OS ────────────────────────────────────────────────────────────
 .DS_Store
 .DS_Store?
 Thumbs.db
 desktop.ini
 
-# ── TypeScript ────────────────────────────────────────────────────
 *.tsbuildinfo

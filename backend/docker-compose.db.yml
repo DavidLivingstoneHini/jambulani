@@ -1,8 +1,8 @@
-# ── Database only — for local development ─────────────────────────
+# Database only — for local development
 # Usage: docker compose -f docker-compose.db.yml up -d
 #
-# Reads credentials from .env (same file as the full stack).
-# Run your backend locally with: python manage.py runserver
+# Reads credentials from .env.
+# Run backend locally with: python manage.py runserver
 
 services:
   db:

@@ -151,7 +151,7 @@ const tabs = [
 ]
 const activeTab = ref('profile')
 
-// ── Profile form ──────────────────────────────────────────────────
+// Profile form
 const profileForm = reactive({
   first_name: authStore.user?.first_name || '',
   last_name: authStore.user?.last_name || '',
@@ -181,7 +181,7 @@ async function handleUpdateProfile() {
   }
 }
 
-// ── Password form ─────────────────────────────────────────────────
+// Password form
 const pwForm = reactive({ current_password: '', new_password: '', new_password_confirm: '' })
 const pwErrors = reactive<Record<string, string>>({})
 const pwLoading = ref(false)
@@ -209,7 +209,7 @@ async function handleChangePassword() {
   }
 }
 
-// ── Logout ────────────────────────────────────────────────────────
+//  Logout 
 async function handleLogout() {
   await authStore.logout()
   router.push('/')

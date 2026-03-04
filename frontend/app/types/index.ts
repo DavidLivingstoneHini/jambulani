@@ -100,7 +100,7 @@ export interface PaginatedResponse<T> {
   results: T[]
 }
 
-// ── Auth ──────────────────────────────────────────────────────────
+// Auth
 export interface AuthUser {
   id: number
   email: string

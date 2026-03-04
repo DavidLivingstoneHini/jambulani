@@ -4,8 +4,6 @@
  * Redirects to /login with a `redirect` query param for post-login navigation.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
-  // Middleware runs on both server and client in Nuxt 4.
-  // Auth state is only available on the client (cookie-based refresh).
   if (!process.client) return
 
   const authStore = useAuthStore()

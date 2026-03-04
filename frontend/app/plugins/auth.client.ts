@@ -6,7 +6,6 @@ export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore()
   const cartStore = useCartStore()
 
-  // Initialize auth first, then cart (cart may need auth token)
   await authStore.initOnClient()
   await cartStore.fetchCart()
 })

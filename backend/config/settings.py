@@ -3,8 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ── Load .env file if present (local dev convenience) ────────────
-# Python 3.11+ stdlib only — no python-dotenv dependency needed
+# Load .env file if present
 _env_file = BASE_DIR / ".env"
 if _env_file.exists():
     with open(_env_file) as _f:
@@ -14,7 +13,6 @@ if _env_file.exists():
                 _key, _, _val = _line.partition("=")
                 os.environ.setdefault(_key.strip(), _val.strip())
 
-# ─────────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-production")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
@@ -64,7 +62,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# ── PostgreSQL (always) ──────────────────────────────────────────
+# PostgreSQL DB Setup
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -102,7 +100,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Django REST Framework ────────────────────────────────────────
+# Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "accounts.authentication.JWTAuthentication",
@@ -131,7 +129,7 @@ REST_FRAMEWORK = {
     },
 }
 
-# ── CORS ─────────────────────────────────────────────────────────
+# CORS
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:3000,http://127.0.0.1:3000",
@@ -142,7 +140,7 @@ CORS_ALLOW_HEADERS = [
     "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with",
 ]
 
-# ── Security (production hardening) ─────────────────────────────
+# Security (production hardening)
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True

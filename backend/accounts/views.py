@@ -152,7 +152,7 @@ class TokenRefreshView(APIView):
         except RefreshToken.DoesNotExist:
             return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Reuse detection: token was already rotated → revoke entire family
+        # Reuse detection: token was already rotated -> revoke entire family
         if rt.replaced_by_id is not None or rt.revoked:
             RefreshToken.revoke_family(rt.family)
             response = Response(
@@ -173,7 +173,7 @@ class TokenRefreshView(APIView):
         if not user.is_active:
             return Response({"detail": "Account deactivated."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Issue new tokens (same family → enables reuse detection)
+        # Issue new tokens (same family -> enables reuse detection)
         new_access = issue_access_token(user)
         new_rt, new_raw_refresh = RefreshToken.issue(
             user=user,

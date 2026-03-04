@@ -61,7 +61,6 @@
         </div>
       </aside>
 
-      <!-- Grid -->
       <div class="flex-1">
         <div class="flex items-center justify-between mb-6">
           <p class="text-sm text-gray-500 font-body">

@@ -17,7 +17,6 @@
 
       <!-- Form -->
       <form class="space-y-4" @submit.prevent="handleLogin">
-        <!-- Global error -->
         <div v-if="serverError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm font-body">
           {{ serverError }}
         </div>

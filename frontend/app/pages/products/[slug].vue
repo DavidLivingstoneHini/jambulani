@@ -1,7 +1,6 @@
 <template>
   <div class="max-w-screen-xl mx-auto px-4 py-6">
 
-    <!-- Breadcrumb -->
     <nav v-if="product" class="flex items-center flex-wrap gap-1 text-[13px] font-body mb-6">
       <NuxtLink to="/" class="text-[#0066cc] hover:underline">Home</NuxtLink>
       <span class="text-gray-400 mx-0.5">›</span>
@@ -14,7 +13,6 @@
       <span class="text-gray-700">{{ product.name }}</span>
     </nav>
 
-    <!-- Skeleton -->
     <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
       <div>
         <div class="aspect-square bg-gray-200 mb-3" />
@@ -36,9 +34,7 @@
     <!-- Product detail -->
     <div v-else-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-      <!-- ── LEFT: Images ── -->
       <div>
-        <!-- Main image -->
         <div class="relative overflow-hidden bg-gray-100 mb-2" style="aspect-ratio: 1/1;">
           <img
             v-if="selectedImage || product.images[0]?.image"
@@ -55,7 +51,6 @@
             </svg>
           </div>
 
-          <!-- Prev/Next arrows -->
           <template v-if="product.images.length > 1">
             <button
               class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2
@@ -79,7 +74,6 @@
             </button>
           </template>
 
-          <!-- Down-chevron bottom-centre (matches design) -->
           <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 z-10">
             <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -87,7 +81,6 @@
           </div>
         </div>
 
-        <!-- Thumbnail strip -->
         <div class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width: thin;">
           <button
             v-for="img in product.images"
@@ -104,16 +97,14 @@
       </div>
 
 
-      <!-- ── RIGHT: Info ── -->
+      <!-- RIGHT: Info -->
       <div class="pt-1">
 
-        <!-- Name -->
         <h1 class="font-display font-bold text-[26px] md:text-[30px] uppercase leading-tight
                    text-gray-900 mb-4">
           {{ product.name }}
         </h1>
 
-        <!-- Price + save badge + favourites -->
         <div class="flex items-center gap-3 flex-wrap mb-5">
           <span class="font-display font-bold text-[36px] leading-none text-gray-900">
             €{{ product.price }}
@@ -137,7 +128,6 @@
           </button>
         </div>
 
-        <!-- Description -->
         <div class="mb-6">
           <p class="font-body text-gray-600 text-[13px] leading-[1.65]">
             {{ showFullDesc ? product.description : truncated }}
@@ -154,7 +144,6 @@
           </p>
         </div>
 
-        <!-- Size -->
         <div class="flex items-start gap-4 mb-4">
           <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2.5">
             Size <span class="text-red-500">*</span>
@@ -233,7 +222,6 @@
           </div>
         </div>
 
-        <!-- Quantity -->
         <div class="flex items-start gap-4 mb-6">
           <label class="font-display font-bold text-[13px] text-gray-800 w-28 shrink-0 pt-2">
             Quantity
@@ -256,13 +244,13 @@
           </div>
         </div>
 
-        <!-- Validation / success feedback -->
+        <!-- Validation -->
         <p v-if="formError" class="text-red-500 text-[13px] font-body mb-3">{{ formError }}</p>
         <p v-if="addedSuccess" class="text-green-600 text-[13px] font-body mb-3">
           ✓ Added to cart successfully!
         </p>
 
-        <!-- Add to Cart — yellow left block + black cart icon right -->
+        <!-- Add to Cart -->
         <button
           class="w-full flex items-center justify-between bg-primary hover:bg-primary-600
                  transition-colors cursor-pointer disabled:opacity-50"

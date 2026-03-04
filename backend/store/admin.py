@@ -1,7 +1,5 @@
 """
-Jambulani store admin — rich, fully featured interface.
-Includes image previews, computed columns, custom actions,
-summary dashboard cards, and colour-coded status badges.
+Jambulani store admin.
 """
 from __future__ import annotations
 
@@ -24,10 +22,7 @@ from .models import (
 )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Shared helpers
-# ──────────────────────────────────────────────────────────────────────────────
-
 def _img(url: str, height: int = 48) -> str:
     return format_html(
         '<img src="{}" height="{}" style="border-radius:4px;object-fit:cover;" />',
@@ -46,10 +41,7 @@ def _badge(text: str, colour: str) -> str:
     )
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # League
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(League)
 class LeagueAdmin(admin.ModelAdmin):
     list_display  = ["logo_thumb", "name", "slug", "product_count", "status_badge", "sort_order"]
@@ -112,10 +104,7 @@ class CollectionAdmin(admin.ModelAdmin):
         return _badge("Active", "#16a34a") if obj.is_active else _badge("Hidden", "#6b7280")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Category
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display  = ["name", "slug", "parent", "league", "collection", "status_badge"]
@@ -130,10 +119,7 @@ class CategoryAdmin(admin.ModelAdmin):
         return _badge("Active", "#16a34a") if obj.is_active else _badge("Hidden", "#6b7280")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Patch
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(Patch)
 class PatchAdmin(admin.ModelAdmin):
     list_display  = ["patch_preview", "name", "extra_price_display", "status_badge"]
@@ -157,10 +143,7 @@ class PatchAdmin(admin.ModelAdmin):
         return _badge("Active", "#16a34a") if obj.is_active else _badge("Inactive", "#6b7280")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Size Chart
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(SizeChart)
 class SizeChartAdmin(admin.ModelAdmin):
     list_display  = ["name", "chart_preview", "description_snippet"]
@@ -175,10 +158,7 @@ class SizeChartAdmin(admin.ModelAdmin):
         return (obj.description[:80] + "…") if len(obj.description) > 80 else obj.description or "—"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Product images inline
-# ──────────────────────────────────────────────────────────────────────────────
-
 class ProductImageInline(admin.TabularInline):
     model   = ProductImage
     extra   = 2
@@ -193,10 +173,7 @@ class ProductImageInline(admin.TabularInline):
         return "—"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Product
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
@@ -250,8 +227,7 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
-    # ── Custom columns ──────────────────────────────────────────
-
+    # Custom columns
     @admin.display(description="Image")
     def primary_thumb(self, obj: Product) -> str:
         img = obj.images.filter(is_primary=True).first() or obj.images.first()
@@ -293,8 +269,7 @@ class ProductAdmin(admin.ModelAdmin):
             return _badge(f"Save {pct}%", "#16a34a")
         return "No discount"
 
-    # ── Bulk actions ────────────────────────────────────────────
-
+    # Bulk actions
     @admin.action(description="★  Mark selected as Featured")
     def make_featured(self, request: HttpRequest, qs: QuerySet) -> None:
         updated = qs.update(is_featured=True)
@@ -321,10 +296,7 @@ class ProductAdmin(admin.ModelAdmin):
         ).prefetch_related("images")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Cart Items  (read-only diagnostic view)
-# ──────────────────────────────────────────────────────────────────────────────
-
+# Cart Items
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
     list_display  = [
@@ -352,10 +324,7 @@ class CartItemAdmin(admin.ModelAdmin):
         return False
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Newsletter Subscribers
-# ──────────────────────────────────────────────────────────────────────────────
-
 @admin.register(NewsletterSubscriber)
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_display  = ["email", "subscribed_at", "status_badge"]
@@ -381,10 +350,7 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
         self.message_user(request, f"{updated} subscriber(s) deactivated.")
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Admin site branding
-# ──────────────────────────────────────────────────────────────────────────────
-
 admin.site.site_header = mark_safe(
     '<span style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;'
     'letter-spacing:2px;font-size:22px">JAMBULANI</span>'
