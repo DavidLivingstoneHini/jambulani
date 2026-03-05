@@ -1,10 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
 
-
 class League(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, db_index=True)
     logo = models.ImageField(upload_to="leagues/", blank=True, null=True)
     image = models.ImageField(upload_to="leagues/", blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -12,6 +11,10 @@ class League(models.Model):
 
     class Meta:
         ordering = ["sort_order", "name"]
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active', 'sort_order']),
+        ]
 
     def __str__(self):
         return self.name
@@ -24,13 +27,17 @@ class League(models.Model):
 
 class Collection(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, db_index=True)
     image = models.ImageField(upload_to="collections/", blank=True, null=True)
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["sort_order", "name"]
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active', 'sort_order']),
+        ]
 
     def __str__(self):
         return self.name
@@ -43,7 +50,7 @@ class Collection(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, db_index=True)
     parent = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="children"
     )
@@ -58,6 +65,11 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "categories"
         ordering = ["name"]
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['league', 'is_active']),
+        ]
 
     def __str__(self):
         return self.name
@@ -76,6 +88,9 @@ class Patch(models.Model):
 
     class Meta:
         verbose_name_plural = "patches"
+        indexes = [
+            models.Index(fields=['is_active']),
+        ]
 
     def __str__(self):
         return self.name
@@ -91,8 +106,8 @@ class SizeChart(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, blank=True)
+    name = models.CharField(max_length=255, db_index=True)
+    slug = models.SlugField(unique=True, blank=True, db_index=True)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="products"
     )
@@ -103,7 +118,7 @@ class Product(models.Model):
         Collection, on_delete=models.SET_NULL, null=True, blank=True, related_name="products"
     )
     description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2, db_index=True)
     original_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     available_sizes = models.JSONField(
         default=list,
@@ -115,14 +130,25 @@ class Product(models.Model):
     )
     allow_name_customization = models.BooleanField(default=True)
     allow_number_customization = models.BooleanField(default=True)
-    is_featured = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    stock = models.PositiveIntegerField(default=100)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    stock = models.PositiveIntegerField(default=100, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active', 'is_featured']),
+            models.Index(fields=['price']),
+            models.Index(fields=['league', 'category']),
+            models.Index(fields=['created_at']),
+            # Composite indexes for common queries
+            models.Index(fields=['is_active', 'is_featured', '-created_at']),
+            models.Index(fields=['league', 'is_active', 'price']),
+            models.Index(fields=['collection', 'is_active']),
+        ]
 
     def __str__(self):
         return self.name
@@ -151,23 +177,35 @@ class ProductImage(models.Model):
     alt_text = models.CharField(max_length=255, blank=True)
     is_primary = models.BooleanField(default=False)
     sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["sort_order"]
+        indexes = [
+            models.Index(fields=['product', 'is_primary']),
+            models.Index(fields=['product', 'sort_order']),
+        ]
 
     def __str__(self):
         return f"{self.product.name} - image {self.sort_order}"
 
 
 class CartItem(models.Model):
-    session_key = models.CharField(max_length=40)
+    session_key = models.CharField(max_length=40, db_index=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     size = models.CharField(max_length=10)
     custom_name = models.CharField(max_length=100, blank=True)
     custom_number = models.CharField(max_length=2, blank=True)
     patch = models.ForeignKey(Patch, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['session_key', 'created_at']),
+            models.Index(fields=['product', 'session_key']),
+            models.Index(fields=['session_key', 'product', 'size']),
+        ]
 
     def __str__(self):
         return f"Cart: {self.product.name} x{self.quantity}"
@@ -179,9 +217,15 @@ class CartItem(models.Model):
 
 
 class NewsletterSubscriber(models.Model):
-    email = models.EmailField(unique=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    email = models.EmailField(unique=True, db_index=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['email', 'is_active']),
+            models.Index(fields=['subscribed_at']),
+        ]
 
     def __str__(self):
         return self.email

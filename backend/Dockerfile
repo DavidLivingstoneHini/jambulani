@@ -7,10 +7,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Runtime dependency for psycopg2-binary and PostgreSQL client for debugging/connection checks
+# Install system dependencies including redis-tools for redis-cli
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     postgresql-client \
+    redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies

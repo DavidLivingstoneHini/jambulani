@@ -2,6 +2,7 @@
 
 import django.db.models.deletion
 from django.db import migrations, models
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
@@ -137,6 +138,7 @@ class Migration(migrations.Migration):
                 ('alt_text', models.CharField(blank=True, max_length=255)),
                 ('is_primary', models.BooleanField(default=False)),
                 ('sort_order', models.PositiveIntegerField(default=0)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),  # Add this line
                 ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='store.product')),
             ],
             options={

@@ -1,20 +1,40 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - jambulani_network
+
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-jambulani_db}
+      POSTGRES_USER: ${POSTGRES_USER:-jambulani_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jambulani2024}
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jambulani_user} -d ${POSTGRES_DB:-jambulani_db}"]
       interval: 5s
       timeout: 5s
       retries: 15
+    networks:
+      - jambulani_network
 
   backend:
     build:
@@ -26,20 +46,95 @@ services:
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
-      # These will be overridden by .env file values
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-jambulani_db}
+      POSTGRES_USER: ${POSTGRES_USER:-jambulani_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jambulani2024}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      PYTHONPATH: /app
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - media_files:/app/media
       - static_files:/app/staticfiles
+      - .:/app
     ports:
       - "8000:8000"
+    networks:
+      - jambulani_network
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A config worker --loglevel=info --concurrency=4
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-jambulani_db}
+      POSTGRES_USER: ${POSTGRES_USER:-jambulani_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jambulani2024}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      PYTHONPATH: /app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - jambulani_network
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-jambulani_db}
+      POSTGRES_USER: ${POSTGRES_USER:-jambulani_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jambulani2024}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      PYTHONPATH: /app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - jambulani_network
 
 volumes:
   postgres_data:
   media_files:
   static_files:
+  redis_data:
+
+networks:
+  jambulani_network:
+    driver: bridge

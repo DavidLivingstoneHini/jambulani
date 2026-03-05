@@ -1,14 +1,10 @@
-# All packages below have pre-built wheels for:
-#   Python 3.11, 3.12, 3.13
-#   Windows, macOS, Linux
-
 # Django core
-Django==5.1.4
+Django==5.0.9
 djangorestframework==3.15.2
 django-cors-headers==4.4.0
 django-filter==24.3
 
-# Image handling — pre-built wheels for all platforms above
+# Image handling
 Pillow==11.1.0
 
 # Auth
@@ -19,3 +15,26 @@ psycopg2-binary==2.9.10
 
 # WSGI server
 gunicorn==23.0.0
+
+# Redis & Caching
+redis==5.2.1
+django-redis==5.4.0
+hiredis==2.4.0
+
+# Async Tasks - Compatible with Django 5.0.x
+celery==5.4.0
+django-celery-beat==2.6.0
+django-celery-results==2.5.1
+celery-progress==0.2.0
+
+# Monitoring
+prometheus-client==0.20.0
+django-prometheus==2.3.1
+
+# Email
+django-anymail==10.3
+
+# Additional dependencies for Celery Beat
+python-crontab==3.0.0
+cron-descriptor==1.4.0
+django-timezone-field==6.1.0

@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from store.models import League, Collection, Category, Patch, Product
-
+from django.utils.text import slugify
 
 LEAGUES = [
     {"name": "Champions League", "slug": "champions-league", "sort_order": 1},
@@ -38,6 +38,7 @@ PRODUCTS = [
     # Featured - Premier League
     {
         "name": "Manchester United 21-22 Home Shirt",
+        "slug": "manchester-united-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -52,6 +53,7 @@ PRODUCTS = [
     },
     {
         "name": "Manchester United 21-22 Away Shirt",
+        "slug": "manchester-united-21-22-away-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -64,6 +66,7 @@ PRODUCTS = [
     },
     {
         "name": "Manchester City 21-22 Home Shirt",
+        "slug": "manchester-city-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -76,6 +79,7 @@ PRODUCTS = [
     },
     {
         "name": "Liverpool 21-22 Home Shirt",
+        "slug": "liverpool-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -88,6 +92,7 @@ PRODUCTS = [
     },
     {
         "name": "Chelsea 21-22 Home Shirt",
+        "slug": "chelsea-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -100,6 +105,7 @@ PRODUCTS = [
     },
     {
         "name": "Arsenal 21-22 Home Shirt",
+        "slug": "arsenal-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "england-premier-league",
@@ -113,6 +119,7 @@ PRODUCTS = [
     # La Liga
     {
         "name": "Real Madrid 21-22 Home Shirt",
+        "slug": "real-madrid-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "la-liga",
@@ -125,6 +132,7 @@ PRODUCTS = [
     },
     {
         "name": "FC Barcelona 21-22 Home Shirt",
+        "slug": "fc-barcelona-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "la-liga",
@@ -137,6 +145,7 @@ PRODUCTS = [
     },
     {
         "name": "Atletico Madrid 21-22 Home Shirt",
+        "slug": "atletico-madrid-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "la-liga",
@@ -150,6 +159,7 @@ PRODUCTS = [
     # Bundesliga
     {
         "name": "Bayern Munich 21-22 Home Shirt",
+        "slug": "bayern-munich-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "bundesliga",
@@ -162,6 +172,7 @@ PRODUCTS = [
     },
     {
         "name": "Borussia Dortmund 21-22 Home Shirt",
+        "slug": "borussia-dortmund-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "bundesliga",
@@ -175,6 +186,7 @@ PRODUCTS = [
     # Serie A
     {
         "name": "Juventus 21-22 Home Shirt",
+        "slug": "juventus-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "serie-a",
@@ -187,6 +199,7 @@ PRODUCTS = [
     },
     {
         "name": "AC Milan 21-22 Home Shirt",
+        "slug": "ac-milan-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "serie-a",
@@ -200,6 +213,7 @@ PRODUCTS = [
     # Ligue 1
     {
         "name": "PSG 21-22 Home Shirt",
+        "slug": "psg-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "ligue-1",
@@ -213,6 +227,7 @@ PRODUCTS = [
     # Copa America
     {
         "name": "Argentina 21-22 Home Shirt",
+        "slug": "argentina-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "copa-america",
@@ -225,6 +240,7 @@ PRODUCTS = [
     },
     {
         "name": "Brazil 21-22 Home Shirt",
+        "slug": "brazil-21-22-home-shirt",
         "price": 30.00,
         "original_price": 89.95,
         "league_slug": "copa-america",
@@ -239,7 +255,7 @@ PRODUCTS = [
 
 
 class Command(BaseCommand):
-    help = "Seeds the database with initial demo data"
+    help = "Seeds the database with initial demo data (fixed slugs)"
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -263,7 +279,8 @@ class Command(BaseCommand):
             _, created = Collection.objects.get_or_create(slug=data["slug"], defaults=data)
             if created:
                 collections_created += 1
-        self.stdout.write(f"Collections: {collections_created} created, {len(COLLECTIONS) - collections_created} already existed")
+        self.stdout.write(
+            f"Collections: {collections_created} created, {len(COLLECTIONS) - collections_created} already existed")
 
         # Create patches
         patches_created = 0
@@ -275,22 +292,36 @@ class Command(BaseCommand):
 
         patches = list(Patch.objects.all())
 
-        # Create products
+        # Create products with explicit slugs
         products_created = 0
         for data in PRODUCTS:
             league_slug = data.pop("league_slug")
+            slug = data.pop("slug")  # Get the explicit slug
             league = League.objects.filter(slug=league_slug).first()
+
+            # Check if product exists by slug
             product, created = Product.objects.get_or_create(
-                name=data["name"],
-                defaults={**data, "league": league},
+                slug=slug,  # Use slug as the unique identifier
+                defaults={
+                    "name": data["name"],
+                    "price": data["price"],
+                    "original_price": data.get("original_price"),
+                    "description": data.get("description", ""),
+                    "available_sizes": data.get("available_sizes", []),
+                    "is_featured": data.get("is_featured", False),
+                    "league": league,
+                }
             )
+
             if created:
                 product.patches.set(patches)
                 product.save()
                 products_created += 1
+                self.stdout.write(f"  Created: {product.name} -> {product.slug}")
+            else:
+                self.stdout.write(f"  Already exists: {product.name} -> {product.slug}")
 
-        self.stdout.write(f"Products: {products_created} created, {len(PRODUCTS) - products_created} already existed")
-        self.stdout.write(self.style.SUCCESS("\n✅ Seed complete!"))
+        self.stdout.write(self.style.SUCCESS(f"\n✅ Seed complete! {products_created} new products created"))
         self.stdout.write(f"Featured products: {Product.objects.filter(is_featured=True).count()}")
         self.stdout.write(f"Total products: {Product.objects.count()}")
         self.stdout.write("\nAdmin login: http://localhost:8000/admin")
