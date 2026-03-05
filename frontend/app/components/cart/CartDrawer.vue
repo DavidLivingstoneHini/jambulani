@@ -14,7 +14,7 @@
     >
       <!-- Header -->
       <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-        <h2 class="font-display font-bold uppercase text-lg tracking-wider">
+        <h2 class="font-body font-bold uppercase text-lg tracking-wider">
           Cart ({{ cartStore.itemCount }})
         </h2>
         <button class="p-2 hover:bg-gray-100 transition-colors" @click="cartStore.isOpen = false">
@@ -30,7 +30,7 @@
           <svg class="w-12 h-12 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <p class="font-display font-semibold uppercase text-sm tracking-wide">Your cart is empty</p>
+          <p class="font-body font-semibold uppercase text-sm tracking-wide">Your cart is empty</p>
           <button class="mt-4 text-sm text-gray-500 underline font-body" @click="cartStore.isOpen = false">
             Continue Shopping
           </button>
@@ -51,12 +51,12 @@
               />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-display font-semibold text-sm leading-tight mb-1 line-clamp-2">{{ item.product.name }}</p>
+              <p class="font-body font-semibold text-sm leading-tight mb-1 line-clamp-2">{{ item.product.name }}</p>
               <p class="text-xs text-gray-500 font-body mb-0.5">Size: <span class="font-semibold">{{ item.size }}</span></p>
               <p v-if="item.custom_name" class="text-xs text-gray-500 font-body mb-0.5">Name: {{ item.custom_name }}</p>
               <p v-if="item.custom_number" class="text-xs text-gray-500 font-body mb-0.5">#{{ item.custom_number }}</p>
               <p v-if="item.patch" class="text-xs text-gray-500 font-body mb-1">Patch: {{ item.patch.name }}</p>
-              <p class="font-display font-bold text-sm">€{{ item.subtotal }}</p>
+              <p class="font-body font-bold text-sm">€{{ item.subtotal }}</p>
             </div>
             <div class="flex flex-col items-end justify-between shrink-0">
               <button
@@ -85,7 +85,7 @@
 
       <!-- Footer -->
       <div v-if="cartStore.cart.items.length > 0" class="border-t border-gray-200 px-4 py-4 space-y-3">
-        <div class="flex justify-between font-display font-bold uppercase text-base">
+        <div class="flex justify-between font-body font-bold uppercase text-base">
           <span>Total</span>
           <span>€{{ cartStore.cartTotal }}</span>
         </div>

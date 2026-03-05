@@ -2,8 +2,6 @@
   <footer class="bg-[#f5f5f6]">
 
     <div class="md:grid grid-cols-4 gap-4 py-16 flex flex-col px-[34px]">
-
-      <!-- Main Menu -->
       <div>
         <p class="text-[12px] text-[#111112] font-bold mb-5 capitalize">Main Menu</p>
         <ul class="text-[12px] font-medium text-[#111112] cursor-pointer">
@@ -17,7 +15,6 @@
         </ul>
       </div>
 
-      <!-- Secondary Menu -->
       <div>
         <p class="text-[12px] text-[#111112] font-bold mb-5 capitalize">Secondary Menu</p>
         <ul class="text-[12px] font-medium text-[#111112] cursor-pointer">
@@ -29,7 +26,6 @@
         </ul>
       </div>
 
-      <!-- Subscribe -->
       <div>
         <p class="text-[12px] text-[#111112] font-bold mb-5 capitalize">Subscribe</p>
         <p class="text-[12px] font-medium text-[#111112] cursor-pointer">
@@ -54,7 +50,6 @@
         </p>
       </div>
 
-      <!-- Follow Us -->
       <div class="md:pl-12">
         <p class="text-[12px] text-[#111112] font-bold mb-5 capitalize">Follow Us</p>
         <div class="flex items-center mt-3">
@@ -78,7 +73,6 @@
 
     </div>
 
-    <!-- Bottom bar -->
     <div class="px-[34px] grid grid-cols-1 md:flex items-center justify-between py-2 bg-[#f5f5f6]">
       <p class="text-[12px] text-[#111112]">© 2021 Jambulani · All rights reserved</p>
       <img src="/assets/images/partners.png" alt="partners" />

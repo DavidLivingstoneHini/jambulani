@@ -6,11 +6,11 @@
       <span class="text-gray-900">Checkout</span>
     </nav>
 
-    <h1 class="font-display font-bold uppercase text-2xl mb-8">Checkout</h1>
+    <h1 class="font-body font-bold uppercase text-2xl mb-8">Checkout</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
       <div class="order-2 md:order-1">
-        <h2 class="font-display font-bold uppercase text-base tracking-wider mb-4 border-b border-gray-200 pb-2">Order Summary</h2>
+        <h2 class="font-body font-bold uppercase text-base tracking-wider mb-4 border-b border-gray-200 pb-2">Order Summary</h2>
         <div v-if="cartStore.cart.items.length === 0" class="text-gray-400 text-sm font-body py-6 text-center">
           Your cart is empty. <NuxtLink to="/products" class="underline">Shop now</NuxtLink>
         </div>
@@ -20,12 +20,12 @@
               <img v-if="item.product.primary_image" :src="item.product.primary_image" :alt="item.product.name" class="w-full h-full object-cover" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-display font-semibold text-sm line-clamp-1">{{ item.product.name }}</p>
+              <p class="font-body font-semibold text-sm line-clamp-1">{{ item.product.name }}</p>
               <p class="text-xs text-gray-500 font-body">{{ item.size }} × {{ item.quantity }}</p>
             </div>
-            <p class="font-display font-bold text-sm shrink-0">€{{ item.subtotal }}</p>
+            <p class="font-body font-bold text-sm shrink-0">€{{ item.subtotal }}</p>
           </div>
-          <div class="flex justify-between font-display font-bold text-base pt-2">
+          <div class="flex justify-between font-body font-bold text-base pt-2">
             <span>Total</span>
             <span>€{{ cartStore.cartTotal }}</span>
           </div>
@@ -33,7 +33,7 @@
       </div>
 
       <div class="order-1 md:order-2">
-        <h2 class="font-display font-bold uppercase text-base tracking-wider mb-4 border-b border-gray-200 pb-2">Contact Information</h2>
+        <h2 class="font-body font-bold uppercase text-base tracking-wider mb-4 border-b border-gray-200 pb-2">Contact Information</h2>
         <div class="bg-yellow-50 border border-yellow-200 p-3 mb-4 text-sm text-yellow-800 font-body">
           Demo checkout form
         </div>

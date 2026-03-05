@@ -1,6 +1,16 @@
 <template>
   <Teleport to="body">
-    <div style="position: fixed; z-index: 40; left: -15px; bottom: 80px;">
+    <div
+      :style="{
+        position: 'fixed',
+        zIndex: 40,
+        left: hidden ? '-143px' : '-15px',
+        bottom: '80px',
+        transition: 'left 0.35s ease',
+        cursor: 'pointer',
+      }"
+      @click="hidden = !hidden"
+    >
       <svg class="animate-left" width="158" height="47" viewBox="0 0 159 56" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           fill-rule="evenodd"
@@ -14,3 +24,7 @@
     </div>
   </Teleport>
 </template>
+
+<script setup lang="ts">
+const hidden = ref(false)
+</script>

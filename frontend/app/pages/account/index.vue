@@ -15,7 +15,7 @@
               {{ authStore.user?.first_name?.[0]?.toUpperCase() || authStore.user?.email?.[0]?.toUpperCase() }}
             </div>
             <div class="min-w-0">
-              <p class="font-display font-bold text-sm truncate">{{ authStore.user?.full_name || 'My Account' }}</p>
+              <p class="font-body font-bold text-sm truncate">{{ authStore.user?.full_name || 'My Account' }}</p>
               <p class="text-gray-400 text-xs font-body truncate">{{ authStore.user?.email }}</p>
             </div>
           </div>
@@ -42,7 +42,7 @@
       <!-- Main content -->
       <div class="md:col-span-3">
         <div v-if="activeTab === 'profile'">
-          <h2 class="font-display font-bold uppercase text-lg tracking-wider mb-6">Personal Information</h2>
+          <h2 class="font-body font-bold uppercase text-lg tracking-wider mb-6">Personal Information</h2>
           <form class="space-y-4 max-w-lg" @submit.prevent="handleUpdateProfile">
             <div v-if="profileSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm font-body">
               Profile updated successfully.
@@ -53,45 +53,45 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">First Name</label>
+                <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">First Name</label>
                 <input v-model="profileForm.first_name" type="text" class="form-input" />
               </div>
               <div>
-                <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Last Name</label>
+                <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Last Name</label>
                 <input v-model="profileForm.last_name" type="text" class="form-input" />
               </div>
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Email</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Email</label>
               <input :value="authStore.user?.email" type="email" class="form-input bg-gray-50" disabled />
               <p class="text-xs text-gray-400 font-body mt-1">Email cannot be changed.</p>
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Phone</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Phone</label>
               <input v-model="profileForm.phone" type="tel" class="form-input" placeholder="+34 000 000 000" />
             </div>
 
-            <h3 class="font-display font-bold uppercase text-sm tracking-wider pt-2 border-t border-gray-100">Shipping Address</h3>
+            <h3 class="font-body font-bold uppercase text-sm tracking-wider pt-2 border-t border-gray-100">Shipping Address</h3>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Address Line 1</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Address Line 1</label>
               <input v-model="profileForm.address_line1" type="text" class="form-input" />
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Address Line 2</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Address Line 2</label>
               <input v-model="profileForm.address_line2" type="text" class="form-input" />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">City</label>
+                <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">City</label>
                 <input v-model="profileForm.city" type="text" class="form-input" />
               </div>
               <div>
-                <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Postal Code</label>
+                <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Postal Code</label>
                 <input v-model="profileForm.postal_code" type="text" class="form-input" />
               </div>
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Country</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Country</label>
               <input v-model="profileForm.country" type="text" class="form-input" />
             </div>
 
@@ -103,7 +103,7 @@
 
         <!-- Change password tab -->
         <div v-if="activeTab === 'password'">
-          <h2 class="font-display font-bold uppercase text-lg tracking-wider mb-6">Change Password</h2>
+          <h2 class="font-body font-bold uppercase text-lg tracking-wider mb-6">Change Password</h2>
           <form class="space-y-4 max-w-lg" @submit.prevent="handleChangePassword">
             <div v-if="pwSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm font-body">
               Password changed. You have been signed out.
@@ -113,17 +113,17 @@
             </div>
 
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Current Password</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Current Password</label>
               <input v-model="pwForm.current_password" type="password" autocomplete="current-password" class="form-input" :class="{ 'border-red-400': pwErrors.current_password }" />
               <p v-if="pwErrors.current_password" class="text-red-500 text-xs mt-1 font-body">{{ pwErrors.current_password }}</p>
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">New Password</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">New Password</label>
               <input v-model="pwForm.new_password" type="password" autocomplete="new-password" class="form-input" :class="{ 'border-red-400': pwErrors.new_password }" />
               <p v-if="pwErrors.new_password" class="text-red-500 text-xs mt-1 font-body">{{ pwErrors.new_password }}</p>
             </div>
             <div>
-              <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Confirm New Password</label>
+              <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Confirm New Password</label>
               <input v-model="pwForm.new_password_confirm" type="password" autocomplete="new-password" class="form-input" :class="{ 'border-red-400': pwErrors.new_password_confirm }" />
               <p v-if="pwErrors.new_password_confirm" class="text-red-500 text-xs mt-1 font-body">{{ pwErrors.new_password_confirm }}</p>
             </div>

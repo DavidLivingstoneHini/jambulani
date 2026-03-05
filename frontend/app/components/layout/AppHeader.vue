@@ -76,7 +76,7 @@
                 <template v-if="authStore.isAuthenticated">
                   <div class="px-4 py-2 border-b border-gray-100">
                     <p class="text-[11px] font-body text-gray-400">Signed in as</p>
-                    <p class="text-sm font-display font-semibold truncate">{{ authStore.user?.email }}</p>
+                    <p class="text-sm font-body font-semibold truncate">{{ authStore.user?.email }}</p>
                   </div>
                   <NuxtLink to="/account" class="block px-4 py-2 text-sm font-body hover:bg-gray-50 transition-colors" @click="accountMenuOpen = false">My Account</NuxtLink>
                   <button class="w-full text-left px-4 py-2 text-sm font-body text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100" @click="handleLogout">Sign Out</button>

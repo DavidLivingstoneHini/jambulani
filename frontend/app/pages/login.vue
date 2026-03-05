@@ -7,7 +7,7 @@
             <span class="font-heading text-black text-2xl">JAMBULANI</span>
           </div>
         </NuxtLink>
-        <h1 class="font-display font-bold uppercase text-2xl tracking-wider">Sign In</h1>
+        <h1 class="font-body font-bold uppercase text-2xl tracking-wider">Sign In</h1>
         <p class="text-gray-500 text-sm font-body mt-1">
           New here?
           <NuxtLink to="/register" class="text-gray-900 font-semibold underline">Create an account</NuxtLink>
@@ -25,7 +25,7 @@
         </div>
 
         <div>
-          <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">
+          <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">
             Email Address
           </label>
           <input
@@ -41,7 +41,7 @@
         </div>
 
         <div>
-          <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">
+          <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">
             Password
           </label>
           <div class="relative">

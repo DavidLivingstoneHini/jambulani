@@ -7,7 +7,7 @@
             <span class="font-heading text-black text-2xl">JAMBULANI</span>
           </div>
         </NuxtLink>
-        <h1 class="font-display font-bold uppercase text-2xl tracking-wider">Create Account</h1>
+        <h1 class="font-body font-bold uppercase text-2xl tracking-wider">Create Account</h1>
         <p class="text-gray-500 text-sm font-body mt-1">
           Already have an account?
           <NuxtLink to="/login" class="text-gray-900 font-semibold underline">Sign in</NuxtLink>
@@ -25,25 +25,25 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">First Name</label>
+            <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">First Name</label>
             <input v-model="form.first_name" type="text" autocomplete="given-name" class="form-input" placeholder="John" :class="{ 'border-red-400': errors.first_name }" />
             <p v-if="errors.first_name" class="text-red-500 text-xs mt-1 font-body">{{ errors.first_name }}</p>
           </div>
           <div>
-            <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Last Name</label>
+            <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Last Name</label>
             <input v-model="form.last_name" type="text" autocomplete="family-name" class="form-input" placeholder="Doe" :class="{ 'border-red-400': errors.last_name }" />
             <p v-if="errors.last_name" class="text-red-500 text-xs mt-1 font-body">{{ errors.last_name }}</p>
           </div>
         </div>
 
         <div>
-          <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Email Address</label>
+          <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Email Address</label>
           <input v-model="form.email" type="email" autocomplete="email" required class="form-input" placeholder="you@example.com" :class="{ 'border-red-400': errors.email }" />
           <p v-if="errors.email" class="text-red-500 text-xs mt-1 font-body">{{ errors.email }}</p>
         </div>
 
         <div>
-          <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Password</label>
+          <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Password</label>
           <div class="relative">
             <input v-model="form.password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" required class="form-input pr-10" placeholder="Min. 8 characters" :class="{ 'border-red-400': errors.password }" />
             <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabindex="-1" @click="showPassword = !showPassword">
@@ -60,7 +60,7 @@
         </div>
 
         <div>
-          <label class="font-display font-bold uppercase text-xs tracking-wide mb-1.5 block">Confirm Password</label>
+          <label class="font-body font-bold uppercase text-xs tracking-wide mb-1.5 block">Confirm Password</label>
           <input v-model="form.password_confirm" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" required class="form-input" placeholder="Repeat password" :class="{ 'border-red-400': errors.password_confirm }" />
           <p v-if="errors.password_confirm" class="text-red-500 text-xs mt-1 font-body">{{ errors.password_confirm }}</p>
         </div>

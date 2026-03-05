@@ -17,19 +17,19 @@
 
   /* Buttons */
   .btn-primary {
-    @apply bg-primary text-black font-display font-bold uppercase tracking-wider
+    @apply bg-primary text-black font-body font-bold uppercase tracking-wider
            px-6 py-3 transition-all duration-200 hover:bg-primary-600
            active:scale-95 cursor-pointer inline-block text-center;
   }
   .btn-dark {
-    @apply bg-black text-white font-display font-bold uppercase tracking-wider
+    @apply bg-black text-white font-body font-bold uppercase tracking-wider
            px-6 py-3 transition-all duration-200 hover:bg-gray-800
            active:scale-95 cursor-pointer;
   }
 
   /* Section heading */
   .section-title {
-    @apply font-display font-extrabold uppercase text-[20px] md:text-[28px] tracking-[0.08em]
+    @apply font-body font-extrabold uppercase text-[24px] md:text-[32px] tracking-[0.08em]
            text-gray-900 mb-5;
   }
 
@@ -39,12 +39,12 @@
   }
 
   /* Price atoms */
-  .price-current  { @apply font-display font-bold text-2xl text-gray-900; }
+  .price-current  { @apply font-body font-bold text-2xl text-gray-900; }
   .price-original { @apply text-red-500 line-through text-base font-body; } /* This will now use Montserrat */
 
   /* Badge */
   .badge-save {
-    @apply bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 uppercase font-display;
+    @apply bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 uppercase font-body;
   }
 
   /* Form elements */

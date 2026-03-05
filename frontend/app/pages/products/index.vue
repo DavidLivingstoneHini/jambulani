@@ -9,11 +9,11 @@
     <div class="flex flex-col md:flex-row gap-8">
       <aside class="w-full md:w-56 shrink-0">
         <div class="border border-gray-200 p-4">
-          <h3 class="font-display font-bold uppercase text-sm tracking-wider mb-4">Filters</h3>
+          <h3 class="font-body font-bold uppercase text-sm tracking-wider mb-4">Filters</h3>
 
           <!-- Search Input -->
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+            <label class="font-body font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               Search
             </label>
             <div class="relative">
@@ -38,7 +38,7 @@
           </div>
 
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+            <label class="font-body font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               League
             </label>
             <select v-model="filters.league" class="form-select text-xs" @change="applyFilters">
@@ -48,7 +48,7 @@
           </div>
 
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+            <label class="font-body font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               Category
             </label>
             <select v-model="filters.category" class="form-select text-xs" @change="applyFilters">
@@ -58,7 +58,7 @@
           </div>
 
           <div class="mb-4" v-if="collections && collections.length">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+            <label class="font-body font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               Collection
             </label>
             <select v-model="filters.collection" class="form-select text-xs" @change="applyFilters">
@@ -69,7 +69,7 @@
 
           <!-- Price Range -->
           <div class="mb-4">
-            <label class="font-display font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
+            <label class="font-body font-semibold text-xs uppercase tracking-wide text-gray-600 mb-2 block">
               Price Range (€)
             </label>
             <div class="flex gap-2">
@@ -180,7 +180,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <p class="font-display font-semibold uppercase text-sm tracking-wide">No products found</p>
+          <p class="font-body font-semibold uppercase text-sm tracking-wide">No products found</p>
           <p class="text-xs mt-1">Try adjusting your search or filters</p>
           <button class="mt-4 text-sm underline font-body hover:text-gray-600" @click="clearFilters">
             Clear all filters

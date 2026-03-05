@@ -20,7 +20,7 @@
 
         <div class="absolute inset-0 flex flex-col justify-between z-10 px-6 md:px-10 py-6 md:py-8">
           <div>
-            <h1 class="font-display font-bold text-white leading-[1.1] text-[24px] md:text-[38px]">
+            <h1 class="font-body font-bold text-white leading-[1.1] text-[24px] md:text-[40px]">
               Your favorite customized<br>
               <span class="text-primary">Club Jerseys.</span>
             </h1>
@@ -42,9 +42,9 @@
             <div class="flex items-stretch flex-shrink-0">
               <NuxtLink
                 to="/products"
-                class="flex items-center px-3 md:px-5 py-2 text-[11px] md:text-[12px] font-display font-semibold text-white
+                class="flex items-center px-3 md:px-5 py-2 text-[12px] font-body font-semibold text-white
                        border border-white hover:bg-white/10 transition-colors whitespace-nowrap"
-                style="background: rgba(0,0,0,0.45);"
+                style="background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
               >
                 Shop Now
               </NuxtLink>
@@ -55,10 +55,8 @@
                 <img src="/assets/icons/shopping-bag.svg" width="13" height="13" alt="" aria-hidden="true" />
               </NuxtLink>
             </div>
-
           </div>
         </div>
-
       </div>
     </section>
 
@@ -72,32 +70,32 @@
           <div class="skewed bg-primary p-2 w-fit mb-4">
             <img src="/assets/icons/shipping.svg" width="17" height="17" alt="" aria-hidden="true" />
           </div>
-          <p class="font-semibold text-[12px] mb-1 inline-block">Secure Shipping</p>
-          <p class="text-[10px]">on all orders</p>
+          <p class="font-bold text-[10px] md:text-[16px] mb-1 inline-block">Secure Shipping</p>
+          <p class="text-[8px] md:text-[12px]">on all orders</p>
         </div>
 
         <div class="overflow-hidden bg-[#fdf9e0] p-5 pb-3">
           <div class="skewed bg-primary p-2 w-fit mb-4">
             <img src="/assets/icons/phone.svg" width="18" height="18" alt="" aria-hidden="true" />
           </div>
-          <p class="font-semibold text-[12px] mb-1 inline-block">Telephone</p>
-          <p class="text-[10px]">+1 (25) 01 7880</p>
+          <p class="font-bold text-[10px] md:text-[16px] mb-1 inline-block">Telephone</p>
+          <p class="text-[8px] md:text-[12px]">+1 (25) 01 7880</p>
         </div>
 
         <div class="overflow-hidden bg-[#fdf9e0] p-5 pb-3">
           <div class="skewed bg-primary p-2 w-fit mb-4">
             <img src="/assets/icons/whatsapp.svg" width="20" height="20" alt="" aria-hidden="true" />
           </div>
-          <p class="font-semibold text-[12px] mb-1 inline-block">Chat WhatsApp</p>
-          <p class="text-[10px]">Mon – Fri: 9:00 – 21:00 · Sat – Sun: 9:00 – 17:00</p>
+          <p class="font-bold text-[10px] md:text-[16px] mb-1 inline-block">Chat WhatsApp</p>
+          <p class="text-[8px] md:text-[12px]">Mon – Fri: 9:00 – 21:00 · Sat – Sun: 9:00 – 17:00</p>
         </div>
 
         <div class="overflow-hidden bg-[#fdf9e0] p-5 pb-3">
           <div class="skewed bg-primary p-2 w-fit mb-4">
             <img src="/assets/icons/quality-badge.svg" width="22" height="21" alt="" aria-hidden="true" />
           </div>
-          <p class="font-semibold text-[12px] mb-1 inline-block">Quality Guarantee</p>
-          <p class="text-[10px]">Verified Purchase Reviews</p>
+          <p class="font-bold text-[10px] md:text-[16px] mb-1 inline-block">Quality Guarantee</p>
+          <p class="text-[8px] md:text-[12px]">Verified Purchase Reviews</p>
         </div>
 
       </div>
@@ -171,7 +169,7 @@
             />
             <div class="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors duration-300" />
           </div>
-          <p class="text-[11px] md:text-[15px] font-display font-bold mt-2 leading-tight text-black">
+          <p class="text-[10.81px] md:text-[16px] font-body font-bold mt-2 leading-tight text-black">
             {{ league.name }}
           </p>
         </NuxtLink>
@@ -191,7 +189,7 @@
           :style="`background-image: url('/assets/images/collections/${col.slug}.jpg'); background-color: ${col.color};`"
         >
           <div class="flex items-center justify-between bg-[#0000007d] backdrop-blur-sm">
-            <small class="text-xs text-white font-medium pl-3">{{ col.name }}</small>
+            <small class="text-[9.79px] md:text-xs text-white font-semibold pl-3">{{ col.name }}</small>
             <small class="bg-primary p-4">
               <img src="/assets/icons/arrow-right.svg" width="8" height="8" alt="" aria-hidden="true" />
             </small>

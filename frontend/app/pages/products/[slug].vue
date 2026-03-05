@@ -134,13 +134,12 @@
                 <option value="" disabled>Select a shirt size</option>
                 <option v-for="size in product.available_sizes" :key="size" :value="size">{{ size }}</option>
               </select>
-              <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                <img src="/assets/icons/chevron-down.svg" class="w-3 h-3" alt="" aria-hidden="true" />
+              <div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+                <img src="/assets/icons/chevron-down.svg" class="w-2 h-2" alt="" aria-hidden="true" />
               </div>
             </div>
             <button
-              v-if="product.size_chart"
-              class="border-gray-300 text-black border px-3 bg-[#F5F5F6] text-[12px] font-bold py-2 whitespace-nowrap"
+              class="border-gray-300 text-[#111112] border px-3 bg-[#F5F5F6] text-[12px] font-semibold py-2 whitespace-nowrap"
               @click="showSizeChart = true"
             >View Size Chart</button>
           </div>
@@ -179,8 +178,8 @@
                 {{ patch.name }}<template v-if="+patch.extra_price > 0"> (+€{{ patch.extra_price }})</template>
               </option>
             </select>
-            <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                <img src="/assets/icons/chevron-down.svg" class="w-3 h-3" alt="" aria-hidden="true" />
+            <div class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+                <img src="/assets/icons/chevron-down.svg" class="w-2 h-2" alt="" aria-hidden="true" />
             </div>
           </div>
         </div>
