@@ -10,7 +10,7 @@ Built with **Nuxt 4** (Vue 3 + TypeScript) on the frontend and **Django REST Fra
 | Layer    | Technology                                      |
 |----------|-------------------------------------------------|
 | Frontend | Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia  |
-| Backend  | Django 4.2, Django REST Framework, PostgreSQL   |
+| Backend  | Django 5.1.4, Django REST Framework, PostgreSQL   |
 | Auth     | Custom JWT with HttpOnly cookies + token rotation |
 | Infra    | Docker + Docker Compose                         |
 
@@ -44,7 +44,7 @@ cd jambulani
 ### 2. Start the backend with Docker
 
 The backend container handles everything automatically on first boot:
-migrations, static files, and demo data (including the admin account).
+migrations, static files, and demo data (including the admin account), make sure you have your docker running.
 
 ```bash
 cd backend
@@ -125,33 +125,7 @@ When Docker starts for the first time, `seed_data` populates the database with:
 
 ## Adding Images
 
-The homepage sections use static images you place in the frontend folder.
-The app works without them (coloured fallback backgrounds show instead),
-but adding them makes it look exactly like the design.
-
-```
-frontend/public/assets/images/
-├── hero-banner.jpg                   ← Hero section (1440 × 400px)
-├── personalization-bg.jpg            ← Personalization card (700 × 300px)
-├── social-bg.jpg                     ← Social Networks card (700 × 300px)
-│
-├── leagues/
-│   ├── champions-league.jpg          (400 × 400px)
-│   ├── europa-league.jpg
-│   ├── copa-america.jpg
-│   ├── asian-cup.jpg
-│   └── african-nations-cup.jpg
-│
-└── collections/
-    ├── kids.jpg                      (640 × 360px)
-    ├── large-sizes.jpg
-    ├── goalkeeper.jpg
-    ├── authentic-pro-player.jpg
-    ├── shorts.jpg
-    └── socks.jpg
-```
-
-Product images are managed through the Django Admin:
+Add images for the seeded Products through the Django Admin Panel:
 **Admin → Store → Products → [select product] → Product Images → Upload**
 
 ---
@@ -168,100 +142,6 @@ docker compose up
 # Full reset — wipes the database and starts fresh
 docker compose down -v
 docker compose up --build
-```
-
----
-
-## Running the Tests
-
-### Backend
-
-```bash
-cd backend
-cp .env.example .env
-
-# Start just the database
-docker compose -f docker-compose.db.yml up -d
-
-# Set up a local Python environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Run all 50 tests
-python manage.py test store.tests accounts.tests --verbosity=2
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm test                   # run once
-npm run test:watch         # watch mode during development
-npm run test:coverage      # with coverage report
-```
-
----
-
-## Project Structure
-
-```
-jambulani/
-├── backend/
-│   ├── accounts/               # Auth: register, login, JWT, profile
-│   │   ├── models.py           # Custom User + RefreshToken models
-│   │   ├── views.py            # Register, Login, Logout, Refresh, Me
-│   │   ├── serializers.py
-│   │   ├── authentication.py   # JWT cookie authentication backend
-│   │   ├── tokens.py           # JWT issue/verify helpers
-│   │   ├── admin.py
-│   │   └── tests/
-│   │       └── test_auth.py    # 23 auth tests
-│   ├── store/
-│   │   ├── models.py           # Product, League, Collection, Cart, etc.
-│   │   ├── views.py            # Product, Cart, Newsletter ViewSets
-│   │   ├── serializers.py
-│   │   ├── filters.py
-│   │   ├── admin.py            # Rich admin with image previews + badges
-│   │   ├── urls.py
-│   │   └── tests/
-│   │       ├── test_models.py  # Model unit tests
-│   │       └── test_api.py     # API integration tests
-│   ├── store/management/commands/
-│   │   └── seed_data.py        # Demo data + admin user
-│   ├── config/
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   └── wsgi.py
-│   ├── Dockerfile
-│   ├── docker-compose.yml      # Backend + PostgreSQL (use this)
-│   ├── docker-compose.db.yml   # PostgreSQL only (for local dev)
-│   ├── entrypoint.sh           # Auto: migrate + collectstatic + seed
-│   ├── requirements.txt
-│   └── .env.example
-│
-└── frontend/
-    ├── app/
-    │   ├── assets/css/         # Tailwind + global styles
-    │   ├── components/
-    │   │   ├── layout/         # AppHeader.vue, AppFooter.vue
-    │   │   ├── cart/           # CartDrawer.vue
-    │   │   └── product/        # ProductCard.vue
-    │   ├── composables/        # useApi.ts, useClientStore.ts
-    │   ├── layouts/            # default.vue (header + footer + rewards tab)
-    │   ├── pages/              # index.vue, products/[slug].vue, account/
-    │   ├── stores/             # auth.ts, cart.ts (Pinia)
-    │   └── types/              # TypeScript interfaces
-    ├── public/assets/images/   # Static images (leagues, collections, hero)
-    ├── tests/
-    │   ├── setup.ts
-    │   ├── stores/             # cart.test.ts, auth.test.ts
-    │   └── components/         # ProductCard.test.ts
-    ├── nuxt.config.ts
-    ├── vitest.config.ts
-    ├── tailwind.config.ts
-    └── package.json
 ```
 
 ---
