@@ -2,15 +2,16 @@
 set -e
 
 echo "Waiting for PostgreSQL..."
-until python -c "import psycopg2; psycopg2.connect(
-    dbname='${POSTGRES_DB}',
-    user='${POSTGRES_USER}',
-    password='${POSTGRES_PASSWORD}',
-    host='${POSTGRES_HOST}',
-    port='${POSTGRES_PORT}'
-)" 2>/dev/null; do
-  echo "  PostgreSQL not ready, retrying..."
-  sleep 1
+echo "Testing connection with:"
+echo "  Database: ${POSTGRES_DB}"
+echo "  User: ${POSTGRES_USER}"
+echo "  Host: ${POSTGRES_HOST}"
+echo "  Port: ${POSTGRES_PORT}"
+
+# Wait for PostgreSQL to be ready
+until PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT} -c '\q' 2>/dev/null; do
+  echo "  PostgreSQL not ready, retrying in 2 seconds..."
+  sleep 2
 done
 echo "PostgreSQL ready."
 
