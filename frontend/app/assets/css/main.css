@@ -29,7 +29,7 @@
 
   /* Section heading */
   .section-title {
-    @apply font-display font-bold uppercase text-[20px] tracking-[0.08em]
+    @apply font-display font-extrabold uppercase text-[20px] md:text-[28px] tracking-[0.08em]
            text-gray-900 mb-5;
   }
 

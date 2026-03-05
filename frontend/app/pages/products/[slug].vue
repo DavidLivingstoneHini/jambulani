@@ -1,7 +1,5 @@
 <template>
   <div class="md:px-[120px] py-6 pb-32 max-w-7xl w-full mx-auto px-2">
-
-    <!-- Breadcrumb -->
     <nav v-if="product" class="w-full mb-4">
       <ol class="flex items-center text-[9px] md:text-[10px]">
         <li>
@@ -21,7 +19,6 @@
       </ol>
     </nav>
 
-    <!-- Loading skeleton -->
     <div v-if="pending" class="md:grid grid-cols-2 flex flex-col py-5 animate-pulse gap-10">
       <div>
         <div class="bg-gray-200 mb-3" style="width:480px; height:450px; max-width:100%;" />
@@ -43,7 +40,6 @@
     <!-- Product detail -->
     <div v-else-if="product" class="md:grid grid-cols-2 flex flex-col py-5 md:gap-8">
 
-      <!-- ── LEFT: image + thumbnails ── -->
       <div>
         <!-- Main image -->
         <div class="relative">
@@ -56,33 +52,23 @@
             class="block object-contain w-full"
           />
           <div v-else class="bg-gray-100 flex items-center justify-center w-full" style="height:450px;">
-            <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0
-                   012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2
-                   2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <img src="/assets/icons/image-placeholder.svg" class="w-20 h-20 text-gray-300" alt="" aria-hidden="true" />
           </div>
 
-          <!-- Prev / Next — bottom-right corner overlapping image -->
           <div class="absolute bottom-[50px] right-[50px] flex gap-2">
             <button
               v-if="imageIndex > 0"
               class="border border-gray-200 p-3 bg-black/60 hover:bg-black/80 transition-colors"
               @click="prevImage"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 6 10">
-                <path d="M0.359054 4.64463C0.161356 4.8403 0.161356 5.1597 0.359054 5.35537L4.39827 9.35316C4.71399 9.66564 5.25 9.442 5.25 8.99779L5.25 1.00221C5.25 0.557998 4.71399 0.334357 4.39827 0.646838L0.359054 4.64463Z" fill="white" />
-              </svg>
+              <img src="/assets/icons/arrow-left-white.svg" width="8" height="8" alt="" aria-hidden="true" />
             </button>
             <button
               v-if="imageIndex + 1 < (product.images?.length ?? 0)"
               class="border border-gray-200 p-3 bg-black/60 hover:bg-black/80 transition-colors"
               @click="nextImage"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 6 10">
-                <path d="M5.64095 4.64463C5.83864 4.8403 5.83864 5.1597 5.64095 5.35537L1.60173 9.35316C1.28601 9.66564 0.75 9.442 0.75 8.99779L0.75 1.00221C0.75 0.557998 1.28601 0.334357 1.60173 0.646838L5.64095 4.64463Z" fill="white" />
-              </svg>
+              <img src="/assets/icons/arrow-right-white.svg" width="8" height="8" alt="" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -104,13 +90,11 @@
         </div>
       </div>
 
-      <!-- ── RIGHT: product info ── -->
+      <!-- product info -->
       <div class="md:pt-0 pt-6">
 
-        <!-- Name -->
         <p class="text-xl font-bold">{{ product.name }}</p>
 
-        <!-- Price row -->
         <div class="mt-2 flex items-center flex-wrap">
           <small class="font-bold text-[30px] mr-3 leading-none">€{{ product.price }}</small>
           <small v-if="product.original_price" class="text-[#EE503E] line-through text-[14px] mr-4">
@@ -121,14 +105,11 @@
             Save {{ product.discount_percentage }}%
           </div>
           <button class="flex items-center ml-auto border-gray-300 text-gray-400 border px-3 py-2">
-            <svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.46642 9.83883L5.4657 9.83817C3.91064 8.42933 2.66051 7.29555 1.79313 6.23606C0.931485 5.18357 0.5 4.26558 0.5 3.297C0.5 1.72725 1.72771 0.5 3.3 0.5C4.19278 0.5 5.05732 0.917668 5.61947 1.5772L6 2.02366L6.38053 1.5772C6.94268 0.917668 7.80722 0.5 8.7 0.5C10.2723 0.5 11.5 1.72725 11.5 3.297C11.5 4.26559 11.0685 5.1836 10.2068 6.23694C9.33938 7.29715 8.08942 8.43225 6.53453 9.84396L6.00128 10.3253L5.46642 9.83883Z" stroke="#393A38" />
-            </svg>
+            <img src="/assets/icons/heart.svg" width="12" height="11" alt="" aria-hidden="true" />
             <span class="ml-2 text-[11px]">Add to Favorites</span>
           </button>
         </div>
 
-        <!-- Description -->
         <p class="text-[#111112] text-[12px] mt-6 leading-relaxed">
           {{ showFullDesc ? product.description : truncated }}
           <button
@@ -143,7 +124,6 @@
           >Read Less</button>
         </p>
 
-        <!-- Size -->
         <div class="flex items-center mt-10">
           <label class="w-[130px] shrink-0 text-xs font-bold">
             Size <span class="text-red-500">*</span>
@@ -155,9 +135,7 @@
                 <option v-for="size in product.available_sizes" :key="size" :value="size">{{ size }}</option>
               </select>
               <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-                <svg class="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
+                <img src="/assets/icons/chevron-down.svg" class="w-3 h-3" alt="" aria-hidden="true" />
               </div>
             </div>
             <button
@@ -202,9 +180,7 @@
               </option>
             </select>
             <div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-              <svg class="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
+                <img src="/assets/icons/chevron-down.svg" class="w-3 h-3" alt="" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -235,9 +211,7 @@
             {{ cartStore.loading ? 'Adding...' : 'Add to Cart' }}
           </div>
           <div class="bg-black px-4 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 16C4.9 16 4.01 16.9 4.01 18C4.01 19.1 4.9 20 6 20C7.1 20 8 19.1 8 18C8 16.9 7.1 16 6 16ZM0 0V2H2L5.6 9.59L4.25 12.04C4.09 12.32 4 12.65 4 13C4 14.1 4.9 15 6 15H18V13H6.42C6.28 13 6.17 12.89 6.17 12.75L6.2 12.63L7.1 11H14.55C15.3 11 15.96 10.59 16.3 9.97L19.88 3.48C19.96 3.34 20 3.17 20 3C20 2.45 19.55 2 19 2H4.21L3.27 0H0ZM16 16C14.9 16 14.01 16.9 14.01 18C14.01 19.1 14.9 20 16 20C17.1 20 18 19.1 18 18C18 16.9 17.1 16 16 16Z" fill="white" />
-            </svg>
+            <img src="/assets/icons/cart.svg" width="16" height="16" alt="" aria-hidden="true" />
           </div>
         </div>
 
@@ -263,9 +237,7 @@
           <div class="flex justify-between items-center mb-4">
             <h3 class="font-bold uppercase text-base tracking-wide">{{ product.size_chart.name }}</h3>
             <button class="p-1 hover:bg-gray-100 transition-colors" @click="showSizeChart = false">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <img src="/assets/icons/close.svg" class="w-5 h-5" alt="Close" />
             </button>
           </div>
           <img :src="product.size_chart.image" :alt="product.size_chart.name" class="w-full" />

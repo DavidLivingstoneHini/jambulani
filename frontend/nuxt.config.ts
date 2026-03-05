@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   googleFonts: {
     families: {
       'Barlow Condensed': [400, 600, 700, 800],
-      Montserrat: [300, 400, 500, 600],
+      'Montserrat': [300, 400, 500, 600, 700, 800],
       'Bebas Neue': true,
     },
     display: 'swap',

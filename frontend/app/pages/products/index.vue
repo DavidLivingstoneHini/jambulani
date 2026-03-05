@@ -187,7 +187,6 @@
           </button>
         </div>
 
-        <!-- Product Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <ProductCard
             v-for="product in products"
@@ -431,7 +430,6 @@ const clearFilters = () => {
   fetchProducts()
 }
 
-// Pagination
 const goToPage = (page: number) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page

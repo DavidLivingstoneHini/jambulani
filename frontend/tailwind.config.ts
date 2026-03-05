@@ -16,7 +16,7 @@ export default {
           DEFAULT: "#f9dc38",
           50: "#fffbeb",
           100: "#fef3c7",
-          500: "#fadd18",
+          500: "#f8d307",
           600: "#d4a017",
         },
         dark: {
@@ -26,8 +26,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Barlow Condensed"', "sans-serif"],
-        heading: ['"Bebas Neue"', "sans-serif"],
+        display: ["Montserrat", "sans-serif"],
+        heading: ["Montserrat", "sans-serif"],
         body: ["Montserrat", "sans-serif"],
       },
       screens: {
