@@ -56,6 +56,7 @@ That's it. Wait for this line in the logs:
 
 ```
 PostgreSQL ready.
+Redis ready.
 seeding complete.
 ```
 
@@ -169,8 +170,56 @@ All endpoints are prefixed `/api/v1/`.
 | `GET` / `PATCH`   | `/auth/me/`                     | Get / update profile               |
 | `POST`            | `/auth/change-password/`        | Change password                    |
 | `POST`            | `/newsletter/subscribe/`        | Newsletter signup                  |
+| `GET`             | `/health/`                      | Comprehensive health check         |
+| `GET`             | `/metrics/`                     | Prometheus metrics (debug only     |
 
 ---
+
+## Backend Commands
+```bash
+# View logs for all services
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f backend
+docker compose logs -f celery_worker
+docker compose logs -f redis
+
+# Run Django management commands
+docker compose exec backend python manage.py shell
+docker compose exec backend python manage.py dbshell
+
+# Monitor Redis
+docker compose exec redis redis-cli monitor
+docker compose exec redis redis-cli info stats
+
+# Check Celery tasks
+docker compose exec celery_worker celery -A config inspect active
+docker compose exec celery_worker celery -A config inspect scheduled
+
+# Run manual Celery task
+docker compose exec backend python manage.py shell
+>>> from store.tasks import send_newsletter_confirmation
+>>> send_newsletter_confirmation.delay('test@example.com')
+```
+---
+
+## Health Check & Monitoring
+
+```bash
+# Comprehensive health check
+curl http://localhost:8000/health/
+
+# Check cache headers
+curl -I http://localhost:8000/api/v1/products/featured/
+
+# View rate limit headers
+curl -I http://localhost:8000/api/v1/products/
+
+# Prometheus metrics (debug mode only)
+curl http://localhost:8000/metrics/
+```
+
 
 ## Troubleshooting
 
@@ -182,6 +231,42 @@ lsof -ti:8000 | xargs kill -9
 # Windows (PowerShell):
 netstat -ano | findstr :8000
 taskkill /PID <PID> /F
+```
+
+**Redis connection refused**
+```bash
+# Check if Redis is running
+docker compose ps redis
+
+# View Redis logs
+docker compose logs redis
+
+# Restart Redis
+docker compose restart redis
+```
+
+**Celery tasks not executing**
+```bash
+# Check Celery worker status
+docker compose ps celery_worker
+
+# View Celery logs
+docker compose logs celery_worker
+
+# Restart Celery
+docker compose restart celery_worker
+```
+
+**Cache not working (always MISS)**
+```bash
+# Check Redis memory usage
+docker compose exec redis redis-cli info memory
+
+# Clear Redis cache
+docker compose exec redis redis-cli FLUSHALL
+
+# Verify cache is working
+docker compose exec redis redis-cli monitor
 ```
 
 **Admin page looks unstyled (plain HTML)**
