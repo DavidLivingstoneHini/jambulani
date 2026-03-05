@@ -81,8 +81,7 @@ def send_abandoned_cart_reminders():
         reminders_sent = 0
         for session_key in sessions:
             items = CartItem.objects.filter(session_key=session_key)
-            # In production, you'd need to link sessions to emails somehow
-            # This is a placeholder implementation
+            # Placeholder implementation
             logger.info(f"Found abandoned cart for session {session_key} with {items.count()} items")
             reminders_sent += 1
 
