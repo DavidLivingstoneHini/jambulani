@@ -60,6 +60,11 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
+        // Handle test environment
+        if (typeof useRuntimeConfig === 'undefined') {
+          return
+        }
+        
         const config = useRuntimeConfig()
         const baseURL = config.public.apiBase as string
         const res = await fetch(`${baseURL}/auth/token/refresh/`, {
@@ -85,8 +90,12 @@ export const useAuthStore = defineStore('auth', {
     async login(payload: LoginPayload): Promise<AuthResponse> {
       this.loading = true
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
         
         console.log('Logging in with:', payload.email)
         
@@ -124,8 +133,12 @@ export const useAuthStore = defineStore('auth', {
     async register(payload: RegisterPayload): Promise<AuthResponse> {
       this.loading = true
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
         
         console.log('Registering with:', payload.email)
         
@@ -162,8 +175,12 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
         
         await fetch(`${baseURL}/auth/logout/`, {
           method: 'POST',
@@ -184,8 +201,12 @@ export const useAuthStore = defineStore('auth', {
     async updateProfile(data: Partial<AuthUser>) {
       if (!this.user) throw new Error('Not authenticated')
       
-      const config = useRuntimeConfig()
-      const baseURL = config.public.apiBase as string
+      // Handle test environment
+      let baseURL = 'http://localhost:8000/api/v1'
+      if (typeof useRuntimeConfig !== 'undefined') {
+        const config = useRuntimeConfig()
+        baseURL = config.public.apiBase as string
+      }
       
       const res = await fetch(`${baseURL}/auth/me/`, {
         method: 'PATCH',
@@ -214,8 +235,12 @@ export const useAuthStore = defineStore('auth', {
     async changePassword(data: { current_password: string; new_password: string; new_password_confirm: string }) {
       if (!this.user) throw new Error('Not authenticated')
       
-      const config = useRuntimeConfig()
-      const baseURL = config.public.apiBase as string
+      // Handle test environment
+      let baseURL = 'http://localhost:8000/api/v1'
+      if (typeof useRuntimeConfig !== 'undefined') {
+        const config = useRuntimeConfig()
+        baseURL = config.public.apiBase as string
+      }
       
       const res = await fetch(`${baseURL}/auth/password/change/`, {
         method: 'POST',

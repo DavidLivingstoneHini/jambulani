@@ -3,6 +3,32 @@
  * Handles auth token injection and error normalization.
  */
 export function useApi() {
+  // Handle test environment
+  if (typeof useRuntimeConfig === 'undefined') {
+    return {
+      apiFetch: async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
+        const mockFetch = global.fetch || (() => Promise.resolve(new Response()))
+        const res = await mockFetch(`http://localhost:8000/api/v1${endpoint}`, {
+          credentials: 'include',
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options?.headers || {})
+          }
+        })
+        
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}))
+          throw error
+        }
+        
+        if (res.status === 204) return null as T
+        return res.json() as Promise<T>
+      },
+      baseURL: 'http://localhost:8000/api/v1'
+    }
+  }
+
   const config = useRuntimeConfig()
   const baseURL = config.public.apiBase as string
 

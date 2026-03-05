@@ -42,7 +42,7 @@ Object.defineProperty(global, 'localStorage', {
   writable: true 
 })
 
-// Mock Nuxt composables
+// Mock Nuxt composables - FIXED VERSION
 vi.mock('#app', () => ({
   useRuntimeConfig: () => ({
     public: {
@@ -64,6 +64,15 @@ vi.mock('#app', () => ({
     hash: '',
   }),
   navigateTo: vi.fn(),
+  defineNuxtRouteMiddleware: vi.fn(),
+}))
+
+// Mock useApi composable
+vi.mock('~/composables/useApi', () => ({
+  useApi: () => ({
+    apiFetch: vi.fn(),
+    baseURL: 'http://localhost:8000/api/v1'
+  })
 }))
 
 // Mock console methods

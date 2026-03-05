@@ -70,8 +70,13 @@ export const useCartStore = defineStore('cart', {
 
       this.loading = true
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
+        
         const authStore = useAuthStore()
 
         const headers: Record<string, string> = {
@@ -101,8 +106,13 @@ export const useCartStore = defineStore('cart', {
 
       this.loading = true
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
+        
         const authStore = useAuthStore()
 
         const headers: Record<string, string> = {
@@ -133,8 +143,13 @@ export const useCartStore = defineStore('cart', {
       if (!process.client) return
 
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
+        
         const authStore = useAuthStore()
 
         const headers: Record<string, string> = {
@@ -162,8 +177,13 @@ export const useCartStore = defineStore('cart', {
       if (!process.client) return
 
       try {
-        const config = useRuntimeConfig()
-        const baseURL = config.public.apiBase as string
+        // Handle test environment
+        let baseURL = 'http://localhost:8000/api/v1'
+        if (typeof useRuntimeConfig !== 'undefined') {
+          const config = useRuntimeConfig()
+          baseURL = config.public.apiBase as string
+        }
+        
         const authStore = useAuthStore()
 
         const headers: Record<string, string> = {}

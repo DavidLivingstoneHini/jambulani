@@ -39,9 +39,7 @@
 
     <!-- Product detail -->
     <div v-else-if="product" class="md:grid grid-cols-2 flex flex-col py-5 md:gap-8">
-
       <div>
-        <!-- Main image -->
         <div class="relative">
           <img
             v-if="selectedImage || product.images[0]?.image"
@@ -73,7 +71,6 @@
           </div>
         </div>
 
-        <!-- Thumbnails -->
         <div class="flex mt-2">
           <img
             v-for="(img, index) in product.images"
@@ -106,7 +103,7 @@
           </div>
           <button class="flex items-center ml-auto border-gray-300 text-gray-400 border px-3 py-2">
             <img src="/assets/icons/heart.svg" width="12" height="11" alt="" aria-hidden="true" />
-            <span class="ml-2 text-[11px]">Add to Favorites</span>
+            <span class="ml-2 text-[11px] hidden md:inline">Add to Favorites</span>
           </button>
         </div>
 
@@ -141,11 +138,13 @@
             <button
               class="border-gray-300 text-[#111112] border px-3 bg-[#F5F5F6] text-[12px] font-semibold py-2 whitespace-nowrap"
               @click="showSizeChart = true"
-            >View Size Chart</button>
+            >
+              <span class="hidden md:inline">View Size Chart</span>
+              <span class="md:hidden">Size Chart</span>
+            </button>
           </div>
         </div>
 
-        <!-- Name on shirt -->
         <div v-if="product.allow_name_customization" class="flex items-center mt-6">
           <label class="w-[130px] shrink-0 text-xs font-bold">Name</label>
           <input
@@ -157,7 +156,6 @@
           />
         </div>
 
-        <!-- Number on shirt -->
         <div v-if="product.allow_number_customization" class="flex items-center mt-6">
           <label class="w-[130px] shrink-0 text-xs font-bold">Number on Shirt</label>
           <input
@@ -168,7 +166,6 @@
           />
         </div>
 
-        <!-- Patch -->
         <div v-if="product.patches?.length > 0" class="flex items-center mt-6">
           <label class="w-[130px] shrink-0 text-xs font-bold">Patch</label>
           <div class="relative flex-1">
@@ -184,7 +181,6 @@
           </div>
         </div>
 
-        <!-- Quantity -->
         <div class="flex items-center mt-6">
           <label class="w-[130px] shrink-0 text-xs font-bold">Quantity</label>
           <input
@@ -196,11 +192,9 @@
           />
         </div>
 
-        <!-- Validation messages -->
         <p v-if="formError" class="text-red-500 text-[12px] mt-3">{{ formError }}</p>
         <p v-if="addedSuccess" class="text-green-600 text-[12px] mt-3">✓ Added to cart successfully!</p>
 
-        <!-- Add to Cart -->
         <div
           class="flex items-stretch mt-10 w-full cursor-pointer"
           :class="{ 'opacity-50 pointer-events-none': cartStore.loading }"
@@ -225,24 +219,26 @@
       </NuxtLink>
     </div>
 
-    <!-- Size Chart Modal -->
     <Transition name="fade">
       <div
-        v-if="showSizeChart && product?.size_chart"
+        v-if="showSizeChart"
         class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
         @click.self="showSizeChart = false"
       >
         <div class="bg-white max-w-lg w-full p-6">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold uppercase text-base tracking-wide">{{ product.size_chart.name }}</h3>
+            <h3 class="font-bold uppercase text-base tracking-wide">{{ product?.size_chart?.name || 'Size Chart' }}</h3>
             <button class="p-1 hover:bg-gray-100 transition-colors" @click="showSizeChart = false">
               <img src="/assets/icons/close.svg" class="w-5 h-5" alt="Close" />
             </button>
           </div>
-          <img :src="product.size_chart.image" :alt="product.size_chart.name" class="w-full" />
-          <p v-if="product.size_chart.description" class="mt-3 text-sm text-gray-600">
-            {{ product.size_chart.description }}
-          </p>
+          <template v-if="product?.size_chart">
+            <img :src="product.size_chart.image" :alt="product.size_chart.name" class="w-full" />
+            <p v-if="product.size_chart.description" class="mt-3 text-sm text-gray-600">
+              {{ product.size_chart.description }}
+            </p>
+          </template>
+          <p v-else class="text-sm text-gray-400 text-center py-6">No size chart available for this product.</p>
         </div>
       </div>
     </Transition>
